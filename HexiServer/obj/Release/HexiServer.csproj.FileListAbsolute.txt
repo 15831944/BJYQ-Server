@@ -1,0 +1,71 @@
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\HexiServer.dll.config
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\HexiServer.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\HexiServer.pdb
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\Microsoft.Web.Infrastructure.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\Newtonsoft.Json.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\Senparc.Weixin.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\Senparc.Weixin.MP.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\Senparc.Weixin.WxOpen.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Helpers.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Mvc.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Razor.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Webpages.Deployment.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Webpages.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Webpages.Razor.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\Newtonsoft.Json.xml
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\Senparc.Weixin.xml
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\Senparc.Weixin.MP.xml
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\Senparc.Weixin.WxOpen.xml
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Razor.xml
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Webpages.xml
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Webpages.Deployment.xml
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Webpages.Razor.xml
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Helpers.xml
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\System.Web.Mvc.xml
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\zh-Hans\System.Web.Razor.resources.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\zh-Hans\System.Web.Webpages.resources.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\zh-Hans\System.Web.Webpages.Deployment.resources.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\zh-Hans\System.Web.Webpages.Razor.resources.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\zh-Hans\System.Web.Helpers.resources.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\bin\zh-Hans\System.Web.Mvc.resources.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\obj\Release\HexiServer.dll
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\obj\Release\HexiServer.pdb
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\obj\Release\HexiServer.csprojResolveAssemblyReference.cache
+C:\Users\dilus\documents\visual studio 2017\Projects\HexiServer\HexiServer\obj\Release\HexiServer.csproj.CoreCompileInputs.cache
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\HexiServer.dll.config
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\HexiServer.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\HexiServer.pdb
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\Microsoft.Web.Infrastructure.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\Newtonsoft.Json.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\Senparc.Weixin.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\Senparc.Weixin.MP.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\Senparc.Weixin.WxOpen.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Helpers.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Mvc.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Razor.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Webpages.Deployment.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Webpages.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Webpages.Razor.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\Newtonsoft.Json.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\Senparc.Weixin.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\Senparc.Weixin.MP.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\Senparc.Weixin.WxOpen.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Razor.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Webpages.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Webpages.Deployment.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Webpages.Razor.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Helpers.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\System.Web.Mvc.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\zh-Hans\System.Web.Razor.resources.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\zh-Hans\System.Web.Webpages.resources.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\zh-Hans\System.Web.Webpages.Deployment.resources.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\zh-Hans\System.Web.Webpages.Razor.resources.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\zh-Hans\System.Web.Helpers.resources.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\zh-Hans\System.Web.Mvc.resources.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\obj\Release\HexiServer.csproj.CoreCompileInputs.cache
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\obj\Release\HexiServer.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\obj\Release\HexiServer.pdb
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\HexiUtils.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\bin\HexiUtils.pdb
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\obj\Release\HexiServer.csprojAssemblyReference.cache
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiServer\obj\Release\HexiServer.csproj.CopyComplete

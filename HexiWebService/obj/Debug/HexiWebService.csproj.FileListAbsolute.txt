@@ -1,0 +1,5 @@
+C:\Users\dilus\Documents\Visual Studio 2017\Projects\HexiServer\HexiWebService\bin\Debug\HexiWebService.dll
+C:\Users\dilus\Documents\Visual Studio 2017\Projects\HexiServer\HexiWebService\bin\Debug\HexiWebService.pdb
+C:\Users\dilus\Documents\Visual Studio 2017\Projects\HexiServer\HexiWebService\obj\Debug\HexiWebService.dll
+C:\Users\dilus\Documents\Visual Studio 2017\Projects\HexiServer\HexiWebService\obj\Debug\HexiWebService.pdb
+C:\Users\dilus\Documents\Visual Studio 2017\Projects\HexiServer\HexiWebService\obj\Debug\HexiWebService.csprojResolveAssemblyReference.cache

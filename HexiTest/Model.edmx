@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="wytnetszModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="应收款">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="概要编号" Type="varchar" MaxLength="9" />
+          <Property Name="概要项ID" Type="int" />
+          <Property Name="房产单元ID" Type="int" />
+          <Property Name="费用项目ID" Type="int" />
+          <Property Name="资源表名称" Type="nvarchar" MaxLength="30" />
+          <Property Name="资源表ID" Type="int" />
+          <Property Name="资源表编号" Type="varchar" MaxLength="30" />
+          <Property Name="占用者ID" Type="int" />
+          <Property Name="占用者身份" Type="nvarchar" MaxLength="30" />
+          <Property Name="计费年月" Type="char" MaxLength="6" />
+          <Property Name="计费年月开始日期" Type="smalldatetime" />
+          <Property Name="计费年月截至日期" Type="smalldatetime" />
+          <Property Name="应收日期" Type="smalldatetime" />
+          <Property Name="应收延期" Type="smallint" />
+          <Property Name="费用计算公式ID" Type="int" />
+          <Property Name="应收金额" Type="decimal" Precision="9" Scale="2" />
+          <Property Name="滞纳金公式ID" Type="int" />
+          <Property Name="滞纳金计算日期" Type="smalldatetime" />
+          <Property Name="滞纳金计算延期" Type="smallint" />
+          <Property Name="滞纳金金额" Type="decimal" Precision="9" Scale="2" />
+          <Property Name="优惠金额" Type="decimal" Precision="9" Scale="2" />
+          <Property Name="缓交年月" Type="char" MaxLength="6" />
+          <Property Name="费用说明" Type="nvarchar" MaxLength="50" />
+          <Property Name="收费状态" Type="nvarchar" MaxLength="10" />
+          <Property Name="收款ID" Type="int" />
+          <Property Name="收据ID" Type="int" />
+          <Property Name="划帐文件ID" Type="int" />
+          <Property Name="占用表ID" Type="int" />
+          <Property Name="尾数标记" Type="bit" />
+          <Property Name="变更表ID" Type="int" />
+          <Property Name="产生来源" Type="int" />
+          <Property Name="监控日期" Type="smalldatetime" />
+          <Property Name="计算滞纳金日期" Type="smalldatetime" />
+          <Property Name="扣减标识" Type="int" />
+          <Property Name="应收调整金额" Type="decimal" Precision="9" Scale="2" />
+          <Property Name="币种代码" Type="char" MaxLength="2" />
+          <Property Name="汇率" Type="decimal" Precision="9" Scale="4" />
+          <Property Name="帐套代码" Type="char" MaxLength="2" />
+          <Property Name="另存源ID" Type="int" />
+        </EntityType>
+        <EntityContainer Name="wytnetszModelStoreContainer">
+          <EntitySet Name="应收款" EntityType="Self.应收款" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="wytnetszModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="应收款">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="概要编号" Type="String" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="概要项ID" Type="Int32" />
+          <Property Name="房产单元ID" Type="Int32" />
+          <Property Name="费用项目ID" Type="Int32" />
+          <Property Name="资源表名称" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="资源表ID" Type="Int32" />
+          <Property Name="资源表编号" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="占用者ID" Type="Int32" />
+          <Property Name="占用者身份" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="计费年月" Type="String" MaxLength="6" FixedLength="true" Unicode="false" />
+          <Property Name="计费年月开始日期" Type="DateTime" Precision="0" />
+          <Property Name="计费年月截至日期" Type="DateTime" Precision="0" />
+          <Property Name="应收日期" Type="DateTime" Precision="0" />
+          <Property Name="应收延期" Type="Int16" />
+          <Property Name="费用计算公式ID" Type="Int32" />
+          <Property Name="应收金额" Type="Decimal" Precision="9" Scale="2" />
+          <Property Name="滞纳金公式ID" Type="Int32" />
+          <Property Name="滞纳金计算日期" Type="DateTime" Precision="0" />
+          <Property Name="滞纳金计算延期" Type="Int16" />
+          <Property Name="滞纳金金额" Type="Decimal" Precision="9" Scale="2" />
+          <Property Name="优惠金额" Type="Decimal" Precision="9" Scale="2" />
+          <Property Name="缓交年月" Type="String" MaxLength="6" FixedLength="true" Unicode="false" />
+          <Property Name="费用说明" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="收费状态" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="收款ID" Type="Int32" />
+          <Property Name="收据ID" Type="Int32" />
+          <Property Name="划帐文件ID" Type="Int32" />
+          <Property Name="占用表ID" Type="Int32" />
+          <Property Name="尾数标记" Type="Boolean" />
+          <Property Name="变更表ID" Type="Int32" />
+          <Property Name="产生来源" Type="Int32" />
+          <Property Name="监控日期" Type="DateTime" Precision="0" />
+          <Property Name="计算滞纳金日期" Type="DateTime" Precision="0" />
+          <Property Name="扣减标识" Type="Int32" />
+          <Property Name="应收调整金额" Type="Decimal" Precision="9" Scale="2" />
+          <Property Name="币种代码" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+          <Property Name="汇率" Type="Decimal" Precision="9" Scale="4" />
+          <Property Name="帐套代码" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+          <Property Name="另存源ID" Type="Int32" />
+        </EntityType>
+        <EntityContainer Name="wytnetszEntities1" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="应收款" EntityType="Self.应收款" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="wytnetszModelStoreContainer" CdmEntityContainer="wytnetszEntities1">
+          <EntitySetMapping Name="应收款">
+            <EntityTypeMapping TypeName="wytnetszModel.应收款">
+              <MappingFragment StoreEntitySet="应收款">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="概要编号" ColumnName="概要编号" />
+                <ScalarProperty Name="概要项ID" ColumnName="概要项ID" />
+                <ScalarProperty Name="房产单元ID" ColumnName="房产单元ID" />
+                <ScalarProperty Name="费用项目ID" ColumnName="费用项目ID" />
+                <ScalarProperty Name="资源表名称" ColumnName="资源表名称" />
+                <ScalarProperty Name="资源表ID" ColumnName="资源表ID" />
+                <ScalarProperty Name="资源表编号" ColumnName="资源表编号" />
+                <ScalarProperty Name="占用者ID" ColumnName="占用者ID" />
+                <ScalarProperty Name="占用者身份" ColumnName="占用者身份" />
+                <ScalarProperty Name="计费年月" ColumnName="计费年月" />
+                <ScalarProperty Name="计费年月开始日期" ColumnName="计费年月开始日期" />
+                <ScalarProperty Name="计费年月截至日期" ColumnName="计费年月截至日期" />
+                <ScalarProperty Name="应收日期" ColumnName="应收日期" />
+                <ScalarProperty Name="应收延期" ColumnName="应收延期" />
+                <ScalarProperty Name="费用计算公式ID" ColumnName="费用计算公式ID" />
+                <ScalarProperty Name="应收金额" ColumnName="应收金额" />
+                <ScalarProperty Name="滞纳金公式ID" ColumnName="滞纳金公式ID" />
+                <ScalarProperty Name="滞纳金计算日期" ColumnName="滞纳金计算日期" />
+                <ScalarProperty Name="滞纳金计算延期" ColumnName="滞纳金计算延期" />
+                <ScalarProperty Name="滞纳金金额" ColumnName="滞纳金金额" />
+                <ScalarProperty Name="优惠金额" ColumnName="优惠金额" />
+                <ScalarProperty Name="缓交年月" ColumnName="缓交年月" />
+                <ScalarProperty Name="费用说明" ColumnName="费用说明" />
+                <ScalarProperty Name="收费状态" ColumnName="收费状态" />
+                <ScalarProperty Name="收款ID" ColumnName="收款ID" />
+                <ScalarProperty Name="收据ID" ColumnName="收据ID" />
+                <ScalarProperty Name="划帐文件ID" ColumnName="划帐文件ID" />
+                <ScalarProperty Name="占用表ID" ColumnName="占用表ID" />
+                <ScalarProperty Name="尾数标记" ColumnName="尾数标记" />
+                <ScalarProperty Name="变更表ID" ColumnName="变更表ID" />
+                <ScalarProperty Name="产生来源" ColumnName="产生来源" />
+                <ScalarProperty Name="监控日期" ColumnName="监控日期" />
+                <ScalarProperty Name="计算滞纳金日期" ColumnName="计算滞纳金日期" />
+                <ScalarProperty Name="扣减标识" ColumnName="扣减标识" />
+                <ScalarProperty Name="应收调整金额" ColumnName="应收调整金额" />
+                <ScalarProperty Name="币种代码" ColumnName="币种代码" />
+                <ScalarProperty Name="汇率" ColumnName="汇率" />
+                <ScalarProperty Name="帐套代码" ColumnName="帐套代码" />
+                <ScalarProperty Name="另存源ID" ColumnName="另存源ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="无" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

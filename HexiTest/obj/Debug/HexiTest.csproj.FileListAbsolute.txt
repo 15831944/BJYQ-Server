@@ -1,0 +1,13 @@
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\bin\Debug\HexiTest.exe.config
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\bin\Debug\HexiTest.exe
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\bin\Debug\HexiTest.pdb
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\bin\Debug\EntityFramework.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\bin\Debug\EntityFramework.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\bin\Debug\zh-Hans\EntityFramework.resources.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\obj\Debug\HexiTest.csprojAssemblyReference.cache
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\obj\Debug\HexiTest.csproj.CoreCompileInputs.cache
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\obj\Debug\HexiTest.csproj.CopyComplete
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\obj\Debug\HexiTest.exe
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\obj\Debug\HexiTest.pdb

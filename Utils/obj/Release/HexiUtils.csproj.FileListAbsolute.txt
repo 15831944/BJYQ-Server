@@ -1,0 +1,15 @@
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\bin\Release\HexiUtils.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\bin\Release\HexiUtils.pdb
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\bin\Release\Newtonsoft.Json.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\bin\Release\Newtonsoft.Json.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\obj\Release\HexiUtils.csproj.CoreCompileInputs.cache
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\obj\Release\HexiUtils.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\obj\Release\HexiUtils.pdb
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\bin\Release\Senparc.Weixin.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\bin\Release\Senparc.Weixin.MP.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\bin\Release\Senparc.Weixin.WxOpen.dll
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\bin\Release\Senparc.Weixin.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\bin\Release\Senparc.Weixin.MP.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\bin\Release\Senparc.Weixin.WxOpen.xml
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\obj\Release\HexiUtils.csprojAssemblyReference.cache
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\Utils\obj\Release\HexiUtils.csproj.CopyComplete

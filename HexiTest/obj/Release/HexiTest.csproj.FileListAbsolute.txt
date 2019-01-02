@@ -1,0 +1,7 @@
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\bin\Release\HexiTest.exe.config
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\bin\Release\HexiTest.exe
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\bin\Release\HexiTest.pdb
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\obj\Release\HexiTest.csprojResolveAssemblyReference.cache
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\obj\Release\HexiTest.csproj.CoreCompileInputs.cache
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\obj\Release\HexiTest.exe
+C:\Users\dilus\Documents\GitHub\CSharpServer\HexiServer\HexiTest\obj\Release\HexiTest.pdb
