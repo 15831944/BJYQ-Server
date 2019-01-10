@@ -35,7 +35,7 @@ namespace HexiServer.Business
             int empId = SQLHelper.ExecuteScalar("wyt", sqlString,
                 new SqlParameter("@OpenId", openId));
             
-            if (empId > 0)
+            if (empId > 0)//
             {
                 string sqlStr =
                     "select " +
@@ -72,79 +72,51 @@ namespace HexiServer.Business
                 return sr;
             }
         }
-
-
-
+        
         /// <summary>
-        /// 判断该员工是否存在
+        /// 绑定微信openid和用户ID
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="userName"></param>
         /// <param name="password"></param>
+        /// <param name="openid"></param>
         /// <returns></returns>
-        public static int CheckEmployeeExist(string userName,string password)
+        public static StatusReport BindUser(string userName, string password, string openid)
         {
-
+            StatusReport sr = new StatusReport();
             SHA1 sha1 = SHA1.Create();
             byte[] pw = sha1.ComputeHash(Encoding.Unicode.GetBytes(password));
-
-            //string sqlString =
-            //   "select " +
-            //   "ID " +
-            //   "from 用户 " +
-            //   "where UserCode = @UserCode";
-
             string sqlString = "select ID, Password from 用户 where ltrim(rtrim(UserCode)) = @UserCode";
 
             DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@UserCode", userName));
             if (dt.Rows.Count == 0)
             {
-                return 0;
+                sr.status = "Fail";
+                sr.result = "用户不存在";
+                return sr;
             }
             DataRow dr = dt.Rows[0];
             int id = Convert.ToInt32(dr["ID"]);
             byte[] storedPassword = (byte[])dr["Password"];
-
-            Boolean isEqual = ComparePasswords(storedPassword, pw);
-
-            return isEqual ? id : 0;
-
-            //int id = SQLHelper.ExecuteScalar(sqlString,
-            //    new SqlParameter("@UserCode", userName));
-
-            //if (id > 0)
-            //{
-            //    return id;
-            //}
-            //else
-            //{
-            //    return 0;
-            //}
-        }
-
-        /// <summary>
-        /// 将微信OpenId和系统中的用户Id绑定，保存到微信员工绑定表
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="openId"></param>
-        /// <returns></returns>
-        public static StatusReport BindEmployee(int id,string openId)
-        {
-            string sqlString =
+            if (!ComparePasswords(storedPassword, pw))
+            {
+                sr.status = "Fail";
+                sr.result = "密码错误";
+                return sr;
+            }
+            sqlString =
                 "if not exists (select 用户ID from 基础资料_微信员工绑定表 where 用户ID = @用户表Id) " +
                 "insert into 基础资料_微信员工绑定表 " +
                 "(用户ID , openid) " +
                 "select " +
                 "@用户表Id, @OpenId " +
                 "select @@identity";
-
-            StatusReport sr = SQLHelper.Insert("wyt", sqlString,
+            sr = SQLHelper.Insert("wyt", sqlString,
                 new SqlParameter("@用户表Id", id),
-                new SqlParameter("@OpenId", openId));
-
+                new SqlParameter("@OpenId", openid));
             return sr;
         }
 
-
+        
         public static StatusReport CheckPassword(string userId, string password)
         {
             StatusReport sr = new StatusReport();
@@ -273,6 +245,57 @@ namespace HexiServer.Business
 }
 
 
+
+///// <summary>
+///// 判断该员工是否存在
+///// </summary>
+///// <param name="name"></param>
+///// <param name="password"></param>
+///// <returns></returns>
+//public static int CheckEmployeeExist(string userName,string password)
+//{
+
+//    SHA1 sha1 = SHA1.Create();
+//    byte[] pw = sha1.ComputeHash(Encoding.Unicode.GetBytes(password));
+//    string sqlString = "select ID, Password from 用户 where ltrim(rtrim(UserCode)) = @UserCode";
+
+//    DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@UserCode", userName));
+//    if (dt.Rows.Count == 0)
+//    {
+//        return 0;
+//    }
+//    DataRow dr = dt.Rows[0];
+//    int id = Convert.ToInt32(dr["ID"]);
+//    byte[] storedPassword = (byte[])dr["Password"];
+
+//    Boolean isEqual = ComparePasswords(storedPassword, pw);
+
+//    return isEqual ? id : 0;
+//}
+
+
+///// <summary>
+///// 将微信OpenId和系统中的用户Id绑定，保存到微信员工绑定表
+///// </summary>
+///// <param name="id"></param>
+///// <param name="openId"></param>
+///// <returns></returns>
+//public static StatusReport BindEmployee(int id,string openId)
+//{
+//    string sqlString =
+//        "if not exists (select 用户ID from 基础资料_微信员工绑定表 where 用户ID = @用户表Id) " +
+//        "insert into 基础资料_微信员工绑定表 " +
+//        "(用户ID , openid) " +
+//        "select " +
+//        "@用户表Id, @OpenId " +
+//        "select @@identity";
+
+//    StatusReport sr = SQLHelper.Insert("wyt", sqlString,
+//        new SqlParameter("@用户表Id", id),
+//        new SqlParameter("@OpenId", openId));
+
+//    return sr;
+//}
 
 /**
  *  
