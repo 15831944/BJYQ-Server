@@ -52,6 +52,10 @@ namespace HexiServer.Models
         /// </summary>
         public string RepairTime { get; set; }//报修时间
         /// <summary>
+        /// 网上报修时间
+        /// </summary>
+        public string RepairTimeOnNet { get; set; }//报修时间
+        /// <summary>
         /// 预约服务时间
         /// </summary>
         public string OrderTime { get; set; }//预约服务时间
@@ -102,7 +106,7 @@ namespace HexiServer.Models
         /// <summary>
         /// 是否已收
         /// </summary>
-        public string IsPaid { get; set; }//是否已收
+        //public string IsPaid { get; set; }//是否已收
         /// <summary>
         /// 是否阅读
         /// </summary>
@@ -126,27 +130,27 @@ namespace HexiServer.Models
         /// <summary>
         /// 延期原因
         /// </summary>
-        public string LateReason { get; set; }//延期原因
+        //public string LateReason { get; set; }//延期原因
         /// <summary>
         /// 预计延期到
         /// </summary>
-        public string LateTime { get; set; }//预计延期到
+        //public string LateTime { get; set; }//预计延期到
         /// <summary>
         /// 是否满意
         /// </summary>
-        public string IsSatisfying { get; set; }//是否满意
+        //public string IsSatisfying { get; set; }//是否满意
         /// <summary>
         /// 业主确认完成  
         /// </summary>
-        public string AffirmComplete { get; set; }//业主确认完成
+        //public string AffirmComplete { get; set; }//业主确认完成
         /// <summary>
         /// 业主确认完成时间  
         /// </summary>
-        public string AffirmCompleteTime { get; set; }//业主确认完成时间
+        //public string AffirmCompleteTime { get; set; }//业主确认完成时间
         /// <summary>
         /// 业主评价  
         /// </summary>
-        public string AffirmCompleteEvaluation { get; set; }//业主评价
+        //public string AffirmCompleteEvaluation { get; set; }//业主评价
         /// <summary>
         /// 回访人  
         /// </summary>
@@ -163,7 +167,29 @@ namespace HexiServer.Models
         /// 身份
         /// </summary>
         public string Identity { get; set; }
-
+        /// <summary>
+        /// 主管意见
+        /// </summary>
+        public string SupervisorOpinion { get; set; }
+        /// <summary>
+        /// 服务台签字
+        /// </summary>
+        public string ReceptionSign { get; set; }
+        /// <summary>
+        /// 客户意见
+        /// </summary>
+        public string ClientOpinion { get; set; }
+        /// <summary>
+        /// 报修处理时间
+        /// </summary>
+        public string DealTime { get; set; }
+        /// <summary>
+        /// 报修处理ID
+        /// </summary>
+        public int? DealID { get; set; }
+        /// <summary>
+        /// 注意事项
+        /// </summary>
         public RepairCaution[] Cautions { get; set; }
     }
 

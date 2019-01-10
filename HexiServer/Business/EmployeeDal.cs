@@ -35,11 +35,11 @@ namespace HexiServer.Business
             int empId = SQLHelper.ExecuteScalar("wyt", sqlString,
                 new SqlParameter("@OpenId", openId));
             
-            if (empId > 0)//
+            if (empId > 0)//如果存在用户ID，说明该openid与用户表ID已绑定，可以直接获取该用户信息
             {
                 string sqlStr =
                     "select " +
-                    "ID,UserCode,UserName,员工ID,ZTCodes " +
+                    "ID,UserCode,UserName,员工ID,ZTCodes,RoleIDs,小程序权限,小程序用户等级 " +
                     "from 用户 " +
                     "where ID = @ID";
 
@@ -53,41 +53,46 @@ namespace HexiServer.Business
                     UserName = (string)dr["UserName"],
                     //ZTCodes = ((string)dr["ZTCodes"]).Split(',')
                 };
+                string jurisdiction = DataTypeHelper.GetStringValue(dr["小程序权限"]);
+                string level = DataTypeHelper.GetStringValue(dr["小程序用户等级"]);
+                string roleIds = DataTypeHelper.GetStringValue(dr["RoleIDs"]);
+                emp.Jurisdiction = jurisdiction.Split(',');
+                emp.Level = level.Split(',');
                 string zts = DataTypeHelper.GetStringValue(dr["ZTCodes"]);
                 if (!string.IsNullOrEmpty(zts))
                 {
                     string[] ztcodes = zts.Split(',');
                     emp = GetZTInfo(emp, ztcodes);
                 }
-                emp = GetJurisdictionInfo(emp, emp.UserName);
+                emp = GetRoleInfo(emp, roleIds);
                 sr.status = "Success";
                 sr.result = "成功";
                 sr.data = emp;
                 return sr;
             }
-            else
+            else//用户ID不存在
             {
                 sr.status = "Fail";
                 sr.result = "无此用户";
                 return sr;
             }
         }
-        
+
         /// <summary>
         /// 绑定微信openid和用户ID
         /// </summary>
-        /// <param name="userName"></param>
+        /// <param name="userCode"></param>
         /// <param name="password"></param>
         /// <param name="openid"></param>
         /// <returns></returns>
-        public static StatusReport BindUser(string userName, string password, string openid)
+        public static StatusReport BindUser(string userCode, string password, string openid)
         {
             StatusReport sr = new StatusReport();
             SHA1 sha1 = SHA1.Create();
             byte[] pw = sha1.ComputeHash(Encoding.Unicode.GetBytes(password));
-            string sqlString = "select ID, Password from 用户 where ltrim(rtrim(UserCode)) = @UserCode";
+            string sqlString = "select ID, Password, UserCode, UserName from 用户 where ltrim(rtrim(UserCode)) = @UserCode";
 
-            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@UserCode", userName));
+            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@UserCode", userCode));
             if (dt.Rows.Count == 0)
             {
                 sr.status = "Fail";
@@ -97,6 +102,8 @@ namespace HexiServer.Business
             DataRow dr = dt.Rows[0];
             int id = Convert.ToInt32(dr["ID"]);
             byte[] storedPassword = (byte[])dr["Password"];
+            string code = DataTypeHelper.GetStringValue(dr["UserCode"]);
+            string userName = DataTypeHelper.GetStringValue(dr["UserName"]);
             if (!ComparePasswords(storedPassword, pw))
             {
                 sr.status = "Fail";
@@ -106,12 +113,14 @@ namespace HexiServer.Business
             sqlString =
                 "if not exists (select 用户ID from 基础资料_微信员工绑定表 where 用户ID = @用户表Id) " +
                 "insert into 基础资料_微信员工绑定表 " +
-                "(用户ID , openid) " +
+                "(用户ID, UserCode, UserName, openid) " +
                 "select " +
-                "@用户表Id, @OpenId " +
+                "@用户表Id, @Usercode, @UserName, @OpenId " +
                 "select @@identity";
             sr = SQLHelper.Insert("wyt", sqlString,
                 new SqlParameter("@用户表Id", id),
+                new SqlParameter("@Usercode", code),
+                new SqlParameter("@UserName", userName),
                 new SqlParameter("@OpenId", openid));
             return sr;
         }
@@ -152,25 +161,25 @@ namespace HexiServer.Business
             //return isEqual ? id : 0;
         }
 
-        private static Employee GetJurisdictionInfo(Employee employee, string name)
-        {
-            string jurisdiction = "";
-            string level = "";
-            string sqlString = "select 权限,等级 from 基础资料_小程序员工权限配置 where 员工 = @员工";
-            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@员工", name));
-            if (dt.Rows.Count == 0)
-            {
-                employee.Jurisdiction = null;
-                employee.Level = null;
-                return employee;
-            }
-            DataRow dr = dt.Rows[0];
-            jurisdiction = DataTypeHelper.GetStringValue(dr["权限"]);
-            level = DataTypeHelper.GetStringValue(dr["等级"]);
-            employee.Jurisdiction = jurisdiction.Split(',');
-            employee.Level = level.Split(',');
-            return employee;
-        }
+        //private static Employee GetJurisdictionInfo(Employee employee, string name)
+        //{
+        //    string jurisdiction = "";
+        //    string level = "";
+        //    string sqlString = "select 权限,等级 from 基础资料_小程序员工权限配置 where 员工 = @员工";
+        //    DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@员工", name));
+        //    if (dt.Rows.Count == 0)
+        //    {
+        //        employee.Jurisdiction = null;
+        //        employee.Level = null;
+        //        return employee;
+        //    }
+        //    DataRow dr = dt.Rows[0];
+        //    jurisdiction = DataTypeHelper.GetStringValue(dr["权限"]);
+        //    level = DataTypeHelper.GetStringValue(dr["等级"]);
+        //    employee.Jurisdiction = jurisdiction.Split(',');
+        //    employee.Level = level.Split(',');
+        //    return employee;
+        //}
 
         private static Employee GetZTInfo(Employee employee, string[] ztcodes)
         {
@@ -189,10 +198,30 @@ namespace HexiServer.Business
             return employee;
         }
 
-        private static Employee GetJurisdictionInfo(Employee employee)
+        /// <summary>
+        /// 获取员工所属角色信息
+        /// </summary>
+        /// <param name="employee"></param>
+        /// <param name="roleIds"></param>
+        /// <returns></returns>
+        private static Employee GetRoleInfo(Employee employee, string roleIds)
         {
-
-            return null;
+            if (!string.IsNullOrEmpty(roleIds))
+            {
+                string[] roleIdArr = roleIds.Split(',');
+                List<Role> roleList = new List<Role>();
+                for (int i = 0; i < roleIdArr.Length; i++)
+                {
+                    string sqlString = "select UserCode from 用户 where ID = " + roleIdArr[i];
+                    DataRow dr = SQLHelper.SelectRow("wyt", sqlString);
+                    Role r = new Role();
+                    r.RoleId = Convert.ToInt32(roleIdArr[i]);
+                    r.RoleName = DataTypeHelper.GetStringValue(dr["UserCode"]);
+                    roleList.Add(r);
+                }
+                employee.RoleInfo = roleList.ToArray();
+            }
+            return employee;
         }
 
         private static Boolean ComparePasswords(byte[] storedPassword, byte[] hashedPassword)

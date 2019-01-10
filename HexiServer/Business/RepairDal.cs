@@ -20,19 +20,16 @@ namespace HexiServer.Business
         /// <returns></returns>
         public static StatusReport GetRepairOrder(string userCode, string ztcode, string status, string orderType)
         {
-            //string receivePerson = UserHelper.GetUser(openId);
-            // select   top   y   *   from   表   where   主键   not   in(select   top   (x-1)*y   主键   from   表) 
             string orderStatusCondition = status == "未完成" ? " and not(isnull(状态,'') = '已完成') " : " and 状态 = '已完成' ";
             StatusReport sr = new StatusReport();
             string sqlString =
-                " select top 100 " +
-                " ID,序号,部门,地址,报修人,联系电话,服务项目,服务类别," +
-                " 紧急程度,报修说明,报修时间,预约服务时间,谈好上门时间,发单人,接单人,派工时间," +
-                " 到场时间,操作人,完成时间,收费类别,材料费,人工费,是否已收,是否阅读,状态,完成情况及所耗物料,报修前照片1," +
-                " 报修前照片2,报修前照片3,处理后照片1,处理后照片2,处理后照片3,延期原因,预计延期到,回访人,回访意见,回访时间, " +
-                " 是否满意,业主确认完成,业主确认完成时间,是否满意,业主评价,是否入户,接单人, case when 所属组团 = @接单人 then '客服专员' else '维修工' end as 身份 " +
-                " from 小程序_工单管理 " +
-                " where 接单人 is not null and (接单人 = @接单人 or 所属组团 = @接单人) and left(分类,2) = @分类";
+                " SELECT TOP 100 " +
+                " ID,部门,序号,地址,报修人,联系电话,服务项目,发单人,接单人,报修时间,派工时间,预约服务时间, " +
+                " 完成情况及所耗物料,操作人,完成时间,材料费,人工费,合计,收费类别,主管意见,服务台签字,客户意见, " +
+                " 目录显示,回访时间,回访意见,回访人,到场时间,状态,是否阅读,报修前照片1,报修前照片2,报修前照片3, " +
+                " 处理后照片1,处理后照片2,处理后照片3,报修处理时间,报修处理ID,网上报修时间,服务类别,紧急程度, " +
+                " 报修说明,谈好上门时间,报修来源,帐套代码,帐套名称 " +
+                " FROM 小程序_工单管理 where 接单人 = @接单人 and 帐套代码 = @帐套代码 ";
             sqlString += orderStatusCondition;
             sqlString += (" order by " + orderType + " desc");
             //sqlString += orderType == "已完成" ? " order by 完成时间 desc " : " order by ID desc ";
@@ -67,46 +64,48 @@ namespace HexiServer.Business
             {
                 List<string> beforeList = new List<string>();
                 List<string> afterList = new List<string>();
-                Repair r = new Repair();
-                r.Id = DataTypeHelper.GetIntValue(row["ID"]);
-                r.SerialNumber = DataTypeHelper.GetStringValue(row["序号"]);
-                r.Department = DataTypeHelper.GetStringValue(row["部门"]);
-                r.Address = DataTypeHelper.GetStringValue(row["地址"]);
-                r.RepairPerson = DataTypeHelper.GetStringValue(row["报修人"]);
-                r.PhoneNumber = DataTypeHelper.GetStringValue(row["联系电话"]);
-                r.ServiceProject = DataTypeHelper.GetStringValue(row["服务项目"]);
-                r.ServiceCategory = DataTypeHelper.GetStringValue(row["服务类别"]);
-                r.Level = DataTypeHelper.GetStringValue(row["紧急程度"]);
-                r.Identity = DataTypeHelper.GetStringValue(row["身份"]);
-                r.NeedIn = DataTypeHelper.GetStringValue(row["是否入户"]);
-                r.RepairExplain = DataTypeHelper.GetStringValue(row["报修说明"]);
-                r.RepairTime = DataTypeHelper.GetDateStringValue(row["报修时间"]);
-                r.OrderTime = DataTypeHelper.GetDateStringValue(row["预约服务时间"]);
-                r.VisitTime = DataTypeHelper.GetDateStringValue(row["谈好上门时间"]);
-                r.SendPerson = DataTypeHelper.GetStringValue(row["发单人"]);
-                r.ReceivePerson = DataTypeHelper.GetStringValue(row["接单人"]);
-                r.DispatchTime = DataTypeHelper.GetDateStringValue(row["派工时间"]);
-                r.ArriveTime = DataTypeHelper.GetDateStringValue(row["到场时间"]);
-                r.OperatePerson = DataTypeHelper.GetStringValue(row["操作人"]);
-                r.CompleteTime = DataTypeHelper.GetDateStringValue(row["完成时间"]);
-                r.ChargeType = DataTypeHelper.GetStringValue(row["收费类别"]);
-                r.MaterialExpense = DataTypeHelper.GetDoubleValue(row["材料费"]);
-                r.LaborExpense = DataTypeHelper.GetDoubleValue(row["人工费"]);
-                r.IsPaid = DataTypeHelper.GetStringValue(row["是否已收"]);
-                r.IsRead = DataTypeHelper.GetIntValue(row["是否阅读"]);
-                r.AffirmComplete = DataTypeHelper.GetStringValue(row["业主确认完成"]);
-                r.AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(row["业主评价"]);
-                r.AffirmCompleteTime = DataTypeHelper.GetDateStringValue(row["业主确认完成时间"]);
-                r.IsSatisfying = DataTypeHelper.GetStringValue(row["是否满意"]);
-                r.CallBackEvaluation = DataTypeHelper.GetStringValue(row["回访意见"]);
-                r.CallBackPerson = DataTypeHelper.GetStringValue(row["回访人"]);
-                r.CallBackTime = DataTypeHelper.GetDateStringValue(row["回访时间"]);
-                r.status = DataTypeHelper.GetStringValue(row["状态"]);
-                r.status = string.IsNullOrEmpty(r.AffirmComplete) ? r.status : "业主已确认";
+                Repair r = new Repair
+                {
+                    Id = DataTypeHelper.GetIntValue(row["ID"]),
+                    SerialNumber = DataTypeHelper.GetStringValue(row["序号"]),
+                    Department = DataTypeHelper.GetStringValue(row["部门"]),
+                    Address = DataTypeHelper.GetStringValue(row["地址"]),
+                    RepairPerson = DataTypeHelper.GetStringValue(row["报修人"]),
+                    PhoneNumber = DataTypeHelper.GetStringValue(row["联系电话"]),
+                    ServiceProject = DataTypeHelper.GetStringValue(row["服务项目"]),
+                    ServiceCategory = DataTypeHelper.GetStringValue(row["服务类别"]),
+                    Level = DataTypeHelper.GetStringValue(row["紧急程度"]),
+                    Identity = DataTypeHelper.GetStringValue(row["身份"]),
+                    NeedIn = DataTypeHelper.GetStringValue(row["是否入户"]),
+                    RepairExplain = DataTypeHelper.GetStringValue(row["报修说明"]),
+                    RepairTime = DataTypeHelper.GetDateStringValue(row["报修时间"]),
+                    OrderTime = DataTypeHelper.GetDateStringValue(row["预约服务时间"]),
+                    VisitTime = DataTypeHelper.GetDateStringValue(row["谈好上门时间"]),
+                    SendPerson = DataTypeHelper.GetStringValue(row["发单人"]),
+                    ReceivePerson = DataTypeHelper.GetStringValue(row["接单人"]),
+                    DispatchTime = DataTypeHelper.GetDateStringValue(row["派工时间"]),
+                    ArriveTime = DataTypeHelper.GetDateStringValue(row["到场时间"]),
+                    OperatePerson = DataTypeHelper.GetStringValue(row["操作人"]),
+                    CompleteTime = DataTypeHelper.GetDateStringValue(row["完成时间"]),
+                    ChargeType = DataTypeHelper.GetStringValue(row["收费类别"]),
+                    MaterialExpense = DataTypeHelper.GetDoubleValue(row["材料费"]),
+                    LaborExpense = DataTypeHelper.GetDoubleValue(row["人工费"]),
+                    //r.IsPaid = DataTypeHelper.GetStringValue(row["是否已收"]);
+                    IsRead = DataTypeHelper.GetIntValue(row["是否阅读"]),
+                    //r.AffirmComplete = DataTypeHelper.GetStringValue(row["业主确认完成"]);
+                    //r.AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(row["业主评价"]);
+                    //r.AffirmCompleteTime = DataTypeHelper.GetDateStringValue(row["业主确认完成时间"]);
+                    //r.IsSatisfying = DataTypeHelper.GetStringValue(row["是否满意"]);
+                    CallBackEvaluation = DataTypeHelper.GetStringValue(row["回访意见"]),
+                    CallBackPerson = DataTypeHelper.GetStringValue(row["回访人"]),
+                    CallBackTime = DataTypeHelper.GetDateStringValue(row["回访时间"]),
+                    status = DataTypeHelper.GetStringValue(row["状态"])
+                };
+                //r.status = string.IsNullOrEmpty(r.AffirmComplete) ? r.status : "业主已确认";
                 r.status = string.IsNullOrEmpty(r.CallBackPerson) ? r.status : "已回访";
                 r.CompleteStatus = DataTypeHelper.GetStringValue(row["完成情况及所耗物料"]);
-                r.LateTime = DataTypeHelper.GetDateStringValue(row["预计延期到"]);
-                r.LateReason = DataTypeHelper.GetStringValue(row["延期原因"]);
+                //r.LateTime = DataTypeHelper.GetDateStringValue(row["预计延期到"]);
+                //r.LateReason = DataTypeHelper.GetStringValue(row["延期原因"]);
                 beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片1"]));
                 beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片2"]));
                 beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片3"]));
@@ -268,21 +267,21 @@ namespace HexiServer.Business
                 r.ChargeType = DataTypeHelper.GetStringValue(row["收费类别"]);
                 r.MaterialExpense = DataTypeHelper.GetDoubleValue(row["材料费"]);
                 r.LaborExpense = DataTypeHelper.GetDoubleValue(row["人工费"]);
-                r.IsPaid = DataTypeHelper.GetStringValue(row["是否已收"]);
+                //r.IsPaid = DataTypeHelper.GetStringValue(row["是否已收"]);
                 r.IsRead = DataTypeHelper.GetIntValue(row["是否阅读"]);
-                r.AffirmComplete = DataTypeHelper.GetStringValue(row["业主确认完成"]);
-                r.AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(row["是否满意"]);
-                r.AffirmCompleteTime = DataTypeHelper.GetDateStringValue(row["业主确认完成时间"]);
-                r.IsSatisfying = DataTypeHelper.GetStringValue(row["是否满意"]);
+                //r.AffirmComplete = DataTypeHelper.GetStringValue(row["业主确认完成"]);
+                //r.AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(row["是否满意"]);
+                //r.AffirmCompleteTime = DataTypeHelper.GetDateStringValue(row["业主确认完成时间"]);
+                //r.IsSatisfying = DataTypeHelper.GetStringValue(row["是否满意"]);
                 r.CallBackEvaluation = DataTypeHelper.GetStringValue(row["回访意见"]);
                 r.CallBackPerson = DataTypeHelper.GetStringValue(row["回访人"]);
                 r.CallBackTime = DataTypeHelper.GetDateStringValue(row["回访时间"]);
                 r.status = DataTypeHelper.GetStringValue(row["状态"]);
-                r.status = string.IsNullOrEmpty(r.AffirmComplete) ? r.status : "业主已确认";
+                //r.status = string.IsNullOrEmpty(r.AffirmComplete) ? r.status : "业主已确认";
                 r.status = string.IsNullOrEmpty(r.CallBackPerson) ? r.status : "已回访";
                 r.CompleteStatus = DataTypeHelper.GetStringValue(row["完成情况及所耗物料"]);
-                r.LateTime = DataTypeHelper.GetDateStringValue(row["预计延期到"]);
-                r.LateReason = DataTypeHelper.GetStringValue(row["延期原因"]);
+                //r.LateTime = DataTypeHelper.GetDateStringValue(row["预计延期到"]);
+                //r.LateReason = DataTypeHelper.GetStringValue(row["延期原因"]);
                 beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片1"]));
                 beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片2"]));
                 beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片3"]));
@@ -761,22 +760,22 @@ namespace HexiServer.Business
                 r.ChargeType = DataTypeHelper.GetStringValue(row["收费类别"]);
                 r.MaterialExpense = DataTypeHelper.GetDoubleValue(row["材料费"]);
                 r.LaborExpense = DataTypeHelper.GetDoubleValue(row["人工费"]);
-                r.IsPaid = DataTypeHelper.GetStringValue(row["是否已收"]);
+                //r.IsPaid = DataTypeHelper.GetStringValue(row["是否已收"]);
                 r.IsRead = DataTypeHelper.GetIntValue(row["是否阅读"]);
-                r.AffirmComplete = DataTypeHelper.GetStringValue(row["业主确认完成"]);
-                r.AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(row["业主评价"]);
-                r.AffirmCompleteTime = DataTypeHelper.GetDateStringValue(row["业主确认完成时间"]);
-                r.IsSatisfying = DataTypeHelper.GetStringValue(row["是否满意"]);
+                //r.AffirmComplete = DataTypeHelper.GetStringValue(row["业主确认完成"]);
+                //r.AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(row["业主评价"]);
+                //r.AffirmCompleteTime = DataTypeHelper.GetDateStringValue(row["业主确认完成时间"]);
+                //r.IsSatisfying = DataTypeHelper.GetStringValue(row["是否满意"]);
                 r.CallBackEvaluation = DataTypeHelper.GetStringValue(row["回访意见"]);
                 r.CallBackPerson = DataTypeHelper.GetStringValue(row["回访人"]);
                 r.CallBackTime = DataTypeHelper.GetDateStringValue(row["回访时间"]);
                 r.status = DataTypeHelper.GetStringValue(row["状态"]);
-                r.status = string.IsNullOrEmpty(r.AffirmComplete) ? r.status : "业主已确认";
+                //r.status = string.IsNullOrEmpty(r.AffirmComplete) ? r.status : "业主已确认";
                 r.status = string.IsNullOrEmpty(r.CallBackPerson) ? r.status : "已回访";
                 r.CompleteStatus = DataTypeHelper.GetStringValue(row["完成情况及所耗物料"]);
-                r.LateTime = DataTypeHelper.GetDateStringValue(row["预计延期到"]);
+                //r.LateTime = DataTypeHelper.GetDateStringValue(row["预计延期到"]);
                 r.type = DataTypeHelper.GetStringValue(row["上报原因"]);
-                r.LateReason = DataTypeHelper.GetStringValue(row["延期原因"]);
+                //r.LateReason = DataTypeHelper.GetStringValue(row["延期原因"]);
                 beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片1"]));
                 beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片2"]));
                 beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片3"]));

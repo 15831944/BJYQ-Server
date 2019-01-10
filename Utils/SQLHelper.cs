@@ -13,7 +13,7 @@ namespace HexiUtils
         //private static string wytConnectionString = "Data Source=192.168.13.1;Initial Catalog=f2wyt;Integrated Security=false;User ID=sa;Password=!1asdfgh";//松园服务器连接字符串
         //private static string wytConnectionString = "Data Source=192.168.0.102;Initial Catalog=wyt;Integrated Security=false;User ID=sa;Password=101128";//松园本地连接字符串
         //private static string wxConnectionString = "Data Source=192.168.0.102;Initial Catalog=wyt;Integrated Security=false;User ID=sa;Password=101128";//松园本地连接字符串
-        private static string wytConnectionString = "Data Source=192.168.1.104;Initial Catalog=wytnetsz;Integrated Security=false;User ID=sa;Password=aBCD1234";//苏州本地连接字符串
+        private static string wytConnectionString = "Data Source=192.168.1.104;Initial Catalog=qwytnet;Integrated Security=false;User ID=sa;Password=aBCD1234";//苏州本地连接字符串
         private static string wxConnectionString = "Data Source=192.168.1.104;Initial Catalog=weixin;Integrated Security=false;User ID=sa;Password=aBCD1234";//苏州本地连接字符串
         //private static string wytConnectionString = "Data Source=192.168.1.199;Initial Catalog=wytnet;Integrated Security=false;User ID=sa;Password=Yq123";//苏州服务器连接字符串
         //private static string wxConnectionString = "Data Source=192.168.1.199;Initial Catalog=weixin;Integrated Security=false;User ID=sa;Password=Yq123";//苏州服务器连接字符串
@@ -46,6 +46,22 @@ namespace HexiUtils
                 }
             }
         }
+
+
+        public static DataRow SelectRow(string database, string sqlString, params SqlParameter[] parameters)
+        {
+            DataTable dt = ExecuteQuery(database, sqlString, parameters);
+            if (dt.Rows.Count == 0)
+            {
+                return null;
+            }
+            else
+            {
+                DataRow dr = dt.Rows[0];
+                return dr;
+            }
+        }
+
 
         /**
          * 该静态方法，用于根据传入的sql语句和相关参数，在数据库中查询
