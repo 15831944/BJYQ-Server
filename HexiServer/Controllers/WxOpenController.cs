@@ -19,24 +19,41 @@ namespace HexiServer.Controllers
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
+        //[HttpPost]
+        //public ActionResult OnLogin(string code)
+        //{
+        //    JsCode2JsonResult jsonResult = SnsApi.JsCode2Json(Comman.Appid, Comman.AppSecret, code);
+        //    if (jsonResult.errcode == Senparc.Weixin.ReturnCode.请求成功)
+        //    {
+        //        SessionBag sessionBag = SessionContainer.UpdateSession(null, jsonResult.openid, jsonResult.session_key);
+        //        Session[sessionBag.Key] = jsonResult;
+        //        Session.Timeout = 60;
+        //        return Json(new { success = true, msg = "OK", sessionId = sessionBag.Key });
+        //    }
+        //    else
+        //    {
+        //        return Json(new { success = false, mag = jsonResult.errmsg, result = jsonResult });
+        //    }
+        //}
+
         [HttpPost]
         public ActionResult OnLogin(string code)
         {
-            var jsonResult = SnsApi.JsCode2Json(Comman.Appid,Comman.AppSecret, code);
+            JsCode2JsonResult jsonResult = SnsApi.JsCode2Json(Comman.Appid, Comman.AppSecret, code);
             if (jsonResult.errcode == Senparc.Weixin.ReturnCode.请求成功)
             {
-                //Session["WxOpenUser"] = jsonResult;
-                var sessionBag = SessionContainer.UpdateSession(null, jsonResult.openid, jsonResult.session_key);
+                SessionBag sessionBag = SessionContainer.UpdateSession(null, jsonResult.openid, jsonResult.session_key);
                 Session[sessionBag.Key] = jsonResult;
                 Session.Timeout = 60;
-                return Json(new { success = true, msg = "OK", sessionId = sessionBag.Key, result = Session[sessionBag.Key] });
+                StatusReport sr = EmployeeDal.CheckOpenIdExist(jsonResult.openid);
+                return Json(new { success = true, msg = "OK", sessionId = sessionBag.Key, userInfo = sr });
             }
             else
             {
                 return Json(new { success = false, mag = jsonResult.errmsg, result = jsonResult });
             }
         }
-        
+
         /// <summary>
         /// 获取员工信息，使用openId获取员工信息
         /// </summary>
@@ -93,7 +110,7 @@ namespace HexiServer.Controllers
         /// <param name="sessionId"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult OnBindUser(string userName,string password,string sessionId)
+        public ActionResult OnBindUser(string userName, string password, string sessionId)
         {
             StatusReport sr = new StatusReport();
             SessionBag sessionBag = null;
@@ -105,26 +122,41 @@ namespace HexiServer.Controllers
                 return Json(sr);
             }
             string openId = sessionBag.OpenId;
-            //string openId = "oTTDy0KN71B2XLMXobrapvhqlHcY";
-            int id = EmployeeDal.CheckEmployeeExist(userName,password);
-            string temp = id > 0 ? "存在" : "不存在";
-            if (id > 0)
-            {
-                sr = EmployeeDal.BindEmployee(id, openId);
-                return Json(sr);
-            }
-            else
-            {
-                var data = new
-                {
-                    msg = "hello world",
-                    username = userName,
-                    password = password,
-                    isExist = temp
-                };
-                return Json(data);
-            }
+            sr = EmployeeDal.BindUser(userName, password, openId);
+            return Json(sr);
         }
+        //public ActionResult OnBindUser(string userName,string password,string sessionId)
+        //{
+        //    StatusReport sr = new StatusReport();
+        //    SessionBag sessionBag = null;
+        //    sessionBag = SessionContainer.GetSession(sessionId);
+        //    if (sessionBag == null)
+        //    {
+        //        sr.status = "Fail";
+        //        sr.result = "session已失效";
+        //        return Json(sr);
+        //    }
+        //    string openId = sessionBag.OpenId;
+        //    //string openId = "oTTDy0KN71B2XLMXobrapvhqlHcY";
+        //    int id = EmployeeDal.CheckEmployeeExist(userName,password);
+        //    string temp = id > 0 ? "存在" : "不存在";
+        //    if (id > 0)
+        //    {
+        //        sr = EmployeeDal.BindEmployee(id, openId);
+        //        return Json(sr);
+        //    }
+        //    else
+        //    {
+        //        var data = new
+        //        {
+        //            msg = "hello world",
+        //            username = userName,
+        //            password = password,
+        //            isExist = temp
+        //        };
+        //        return Json(data);
+        //    }
+        //}
 
         [HttpPost]
         public ActionResult OnCheckPassword(string userId, string password)
@@ -138,6 +170,41 @@ namespace HexiServer.Controllers
             }
             sr = EmployeeDal.CheckPassword(userId, password);
             return Json(sr);
+        }
+
+
+
+
+        private StatusReport GetUserInfo(string sessionId)
+        {
+            StatusReport sr = new StatusReport();
+
+            if (string.IsNullOrEmpty(sessionId))//如果sessionId为空，则返回错误信息
+            {
+                sr.status = "Fail";
+                sr.result = "sessionId不存在";
+                sr.parameters = sessionId;
+                return sr;
+            }
+            SessionBag sessionBag = null;
+            sessionBag = SessionContainer.GetSession(sessionId);
+            if (sessionBag == null)
+            {
+                sr.status = "Fail";
+                sr.result = "session已失效";
+                return sr;
+            }
+            string openId = sessionBag.OpenId;
+            sr = EmployeeDal.CheckOpenIdExist(openId);
+            //if (sr.data != null)
+            //{
+            //    var o = JsonConvert.DeserializeObject(sr.data);
+            //    return Json(new { status = "Success", result = "成功", data = o });
+            //}
+            //else
+            //{
+            return sr;
+            //}
         }
     }
 }

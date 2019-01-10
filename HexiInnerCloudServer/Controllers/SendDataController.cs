@@ -36,10 +36,10 @@ namespace HexiInnerCloudServer.Controllers
             
             responseMessage = client.SendAsync(requestMessage).Result;
             string result = responseMessage.Content.ReadAsStringAsync().Result;
-            if (result.Substring(0,1) == "<")
-            {
-                return "{\"status\": \"Fail\", \"result\": \"本地服务器发生错误：" + "系统内部错误" + "\"}";
-            }
+            //if (result.Substring(0,1) == "<")
+            //{
+            //    return "{\"status\": \"Fail\", \"result\": \"本地服务器发生错误：" + "系统内部错误" + "\"}";
+            //}
 
             return result;
         }
