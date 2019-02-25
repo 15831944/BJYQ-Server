@@ -137,7 +137,24 @@ namespace HexiUtils
         /// <returns></returns>
         public static Object GetDBValue(string value)
         {
-            if (String.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value) || value == "null" || value == "undefined")
+            {
+                return DBNull.Value;
+            }
+            else
+            {
+                return value;
+            }
+        }
+
+        /// <summary>
+        /// 将数据转换为可以存储到数据库中的类型。如果字符串为空，则返回DBNull.Value；如果不为空，则原样返回。
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Object GetAllowEmptyDBValue(string value)
+        {
+            if (value == null || value == "null" || value == "undefined")
             {
                 return DBNull.Value;
             }

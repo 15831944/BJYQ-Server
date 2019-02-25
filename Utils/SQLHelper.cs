@@ -9,12 +9,11 @@ namespace HexiUtils
 {
     public class SQLHelper
     {
-
-        //private static string wytConnectionString = "Data Source=192.168.13.1;Initial Catalog=f2wyt;Integrated Security=false;User ID=sa;Password=!1asdfgh";//松园服务器连接字符串
-        //private static string wytConnectionString = "Data Source=192.168.0.102;Initial Catalog=wyt;Integrated Security=false;User ID=sa;Password=101128";//松园本地连接字符串
-        //private static string wxConnectionString = "Data Source=192.168.0.102;Initial Catalog=wyt;Integrated Security=false;User ID=sa;Password=101128";//松园本地连接字符串
         private static string wytConnectionString = "Data Source=192.168.1.104;Initial Catalog=qwytnet;Integrated Security=false;User ID=sa;Password=aBCD1234";//苏州本地连接字符串
         private static string wxConnectionString = "Data Source=192.168.1.104;Initial Catalog=weixin;Integrated Security=false;User ID=sa;Password=aBCD1234";//苏州本地连接字符串
+
+        //private static string wytConnectionString = "Data Source=192.168.1.104;Initial Catalog=qwytnet;Integrated Security=false;User ID=sa;Password=aBCD1234";//苏州本地连接字符串
+        //private static string wxConnectionString = "Data Source=192.168.1.104;Initial Catalog=weixin;Integrated Security=false;User ID=sa;Password=aBCD1234";//苏州本地连接字符串
         //private static string wytConnectionString = "Data Source=192.168.1.199;Initial Catalog=wytnet;Integrated Security=false;User ID=sa;Password=Yq123";//苏州服务器连接字符串
         //private static string wxConnectionString = "Data Source=192.168.1.199;Initial Catalog=weixin;Integrated Security=false;User ID=sa;Password=Yq123";//苏州服务器连接字符串
         /**
@@ -43,6 +42,35 @@ namespace HexiUtils
                     SqlDataAdapter adapter = new SqlDataAdapter(cmd);
                     adapter.Fill(dt);
                     return dt;
+                }
+            }
+        }
+
+
+        public static DataSet ExecuteProcedure(string database, string sqlString, params SqlParameter[] parameters)
+        {
+            string connectionString = "";
+            if (database == "wyt")
+            {
+                connectionString = wytConnectionString;
+            }
+            else
+            {
+                connectionString = wxConnectionString;
+            }
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand cmd = connection.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = sqlString;
+                    cmd.Parameters.AddRange(parameters);
+                    DataSet ds = new DataSet();
+                    //DataTable dt = new DataTable();
+                    SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                    adapter.Fill(ds);
+                    return ds;
                 }
             }
         }
