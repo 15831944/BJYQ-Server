@@ -7,7 +7,7 @@ namespace HexiServer.Models
 {
     public class Comman
     {
-        public static string Appid = "wx6e9eec5247575ed6";
-        public static string AppSecret = "653a725afbf59edb3b5181af97646847";
+        public static string Appid = "wxa5993d856808a1ba";
+        public static string AppSecret = "1a8c9242a945925707fe5e7bf73f6962";
     }
 }

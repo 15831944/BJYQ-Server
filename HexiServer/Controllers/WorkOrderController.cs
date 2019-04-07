@@ -49,15 +49,24 @@ namespace HexiServer.Controllers
         /// <param name="laborExpense"></param>
         /// <param name="materialExpense"></param>
         /// <returns></returns>
-        public ActionResult OnSetRepairOrder(string sessionId, string id, string arriveTime, string completeTime, string completeStatus, string chargeType, string laborExpense, string materialExpense, string status, string lateReason, string lateTime, string isPaid)
+        //public ActionResult OnSetRepairOrder(string sessionId, string id, string arriveTime, string completeTime, string completeStatus, string chargeType, string laborExpense, string materialExpense, string status, string lateReason, string lateTime, string isPaid)
+        public ActionResult OnSetRepairOrder(string sessionId, string id, string arriveTime, string completeTime, string completeStatus, string chargeType, string laborExpense, string materialExpense, string status)
         {
             StatusReport sr = new StatusReport();
-            sr = RepairDal.SetRepairOrder(id, arriveTime, completeTime, completeStatus, chargeType, laborExpense, materialExpense,status,lateReason,lateTime,isPaid);
+            sr = RepairDal.SetRepairOrder(id, arriveTime, completeTime, completeStatus, chargeType, laborExpense, materialExpense,status);
             return Json(sr);
         }
 
 
-
+        /// <summary>
+        /// 将报事信息写入数据库
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="address"></param>
+        /// <param name="detail"></param>
+        /// <param name="classify"></param>
+        /// <param name="time"></param>
+        /// <returns></returns>
         public ActionResult OnSetPatrol(string name, string address, string detail, string classify, string time)
         {
             StatusReport sr = new StatusReport();
@@ -71,6 +80,12 @@ namespace HexiServer.Controllers
             return Json(sr);
         }
 
+        /// <summary>
+        /// 获取历史报事信息
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="classify"></param>
+        /// <returns></returns>
         public ActionResult OnGetPatrol(string name, string classify)
         {
             StatusReport sr = new StatusReport();
@@ -86,7 +101,11 @@ namespace HexiServer.Controllers
         }
 
 
-
+        /// <summary>
+        /// 设置工单已读
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public ActionResult OnSetOrderIsRead(string id)
         {
             StatusReport sr = new StatusReport();
@@ -94,7 +113,10 @@ namespace HexiServer.Controllers
             return Json(sr);
         }
 
-
+        /// <summary>
+        /// 保存工单照片
+        /// </summary>
+        /// <returns></returns>
         public ActionResult OnSetRepairImage()
         {
             StatusReport sr = new StatusReport();
@@ -106,8 +128,7 @@ namespace HexiServer.Controllers
             }
             try
             {
-                string mainPath = "F:\\wytws\\Files\\jczl_fwrwgl\\";
-                string imagePath = mainPath + Request.Files.AllKeys[0];
+                string imagePath = Config.repairImageMainPath + Request.Files.AllKeys[0];
                 string sqlImagePath = Request.Files.AllKeys[0];
                 HttpPostedFileBase uploadImage = (Request.Files[0]);
                 uploadImage.SaveAs(imagePath);
@@ -124,7 +145,10 @@ namespace HexiServer.Controllers
                 return Json(sr);
             }
         }
-
+        /// <summary>
+        /// 保存报事照片
+        /// </summary>
+        /// <returns></returns>
         public ActionResult OnSetPatrolImage()
         {
             StatusReport sr = new StatusReport();
@@ -136,8 +160,7 @@ namespace HexiServer.Controllers
             }
             try
             {
-                string mainPath = "F:\\wytws\\Files\\jczl_fwrwgl\\";
-                string imagePath = mainPath + Request.Files.AllKeys[0];
+                string imagePath = Config.patrolImageMainPath + Request.Files.AllKeys[0];
                 string sqlImagePath = Request.Files.AllKeys[0];
                 HttpPostedFileBase uploadImage = (Request.Files[0]);
                 uploadImage.SaveAs(imagePath);

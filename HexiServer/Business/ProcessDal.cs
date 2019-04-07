@@ -8,7 +8,12 @@ using HexiUtils;
 using System.Collections;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
+/// <summary>
+/// 任务值：
+///     0： 传阅
+///     4： 知会
+///     5： 并行
+/// </summary>
 namespace HexiServer.Business
 {
     public class ProcessDal
@@ -174,11 +179,7 @@ namespace HexiServer.Business
             //sr.data = data;
             return sr;
         }
-
-
         
-
-
 
         public static StatusReport BussinessHandler_NextLink(string registId, string transferObjectId, string receiveLinkId, string receiveLinkIds, string userId, string businessId, string linkId, string task, string staffId, string lastInstanceId, string department, string secondDepartment, string thirdDepartment, string registerId)
         {
@@ -200,27 +201,53 @@ namespace HexiServer.Business
             DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString,  spRegistId, spTransferObjectId, spReceiveLinkId, spReceiveLinkIds);
             DataTable dtallowReceiveLinks = ds.Tables[0];
             List<object> allowReceiveLinkList = new List<object>();
+            List<object> outOfControlLinkList = new List<object>();
             foreach (DataRow dr in dtallowReceiveLinks.Rows)
             {
-                var item = new
+                int? theTask = DataTypeHelper.GetIntValue(dr["任务"]);
+                if (theTask.HasValue && (theTask == 4 || theTask == 5))
                 {
-                    linkId = DataTypeHelper.GetIntValue(dr["环节ID"]),
-                    task = DataTypeHelper.GetIntValue(dr["任务"]),
-                    staffId = DataTypeHelper.GetIntValue(dr["人员ID"]),
-                    operationStaff = DataTypeHelper.GetStringValue(dr["操作人员"]),
-                    department = DataTypeHelper.GetStringValue(dr["部门"]),
-                    selectExplain = DataTypeHelper.GetStringValue(dr["选择说明"]),
-                    //selectCondition = DataTypeHelper.GetStringValue(dr["选择条件"]),
-                    assignOperator = DataTypeHelper.GetIntValue(dr["指定具体接收人"]),
-                    objectExplain = DataTypeHelper.GetStringValue(dr["对象描述"]),
-                    operationStaffLimit = DataTypeHelper.GetStringValue(dr["操作人员限制"]),
-                    selectedRoleMemberId = DataTypeHelper.GetIntValue(dr["指定角色成员ID"]),
-                    staffHandling = DataTypeHelper.GetStringValue(dr["经手人信息"]),
-                    staffHandled = DataTypeHelper.GetStringValue(dr["曾经经手"])
-                };
-                allowReceiveLinkList.Add(item);
+                    var item = new
+                    {
+                        linkId = DataTypeHelper.GetIntValue(dr["环节ID"]),
+                        task = theTask,
+                        staffId = DataTypeHelper.GetIntValue(dr["人员ID"]),
+                        operationStaff = DataTypeHelper.GetStringValue(dr["操作人员"]),
+                        department = DataTypeHelper.GetStringValue(dr["部门"]),
+                        selectExplain = DataTypeHelper.GetStringValue(dr["选择说明"]),
+                        //selectCondition = DataTypeHelper.GetStringValue(dr["选择条件"]),
+                        assignOperator = DataTypeHelper.GetIntValue(dr["指定具体接收人"]),
+                        objectExplain = DataTypeHelper.GetStringValue(dr["对象描述"]),
+                        operationStaffLimit = DataTypeHelper.GetStringValue(dr["操作人员限制"]),
+                        selectedRoleMemberId = DataTypeHelper.GetIntValue(dr["指定角色成员ID"]),
+                        staffHandling = DataTypeHelper.GetStringValue(dr["经手人信息"]),
+                        staffHandled = DataTypeHelper.GetStringValue(dr["曾经经手"])
+                    };
+                    outOfControlLinkList.Add(item);
+                }
+                else
+                {
+                    var item = new
+                    {
+                        linkId = DataTypeHelper.GetIntValue(dr["环节ID"]),
+                        task = theTask,
+                        staffId = DataTypeHelper.GetIntValue(dr["人员ID"]),
+                        operationStaff = DataTypeHelper.GetStringValue(dr["操作人员"]),
+                        department = DataTypeHelper.GetStringValue(dr["部门"]),
+                        selectExplain = DataTypeHelper.GetStringValue(dr["选择说明"]),
+                        //selectCondition = DataTypeHelper.GetStringValue(dr["选择条件"]),
+                        assignOperator = DataTypeHelper.GetIntValue(dr["指定具体接收人"]),
+                        objectExplain = DataTypeHelper.GetStringValue(dr["对象描述"]),
+                        operationStaffLimit = DataTypeHelper.GetStringValue(dr["操作人员限制"]),
+                        selectedRoleMemberId = DataTypeHelper.GetIntValue(dr["指定角色成员ID"]),
+                        staffHandling = DataTypeHelper.GetStringValue(dr["经手人信息"]),
+                        staffHandled = DataTypeHelper.GetStringValue(dr["曾经经手"])
+                    };
+                    allowReceiveLinkList.Add(item);
+                }
+
             }
-            var data = new { allowReceiveLinks = allowReceiveLinkList.ToArray(),
+            var data = new { allowReceiveLinks = allowReceiveLinkList.ToArray(), outOfControlLinks = outOfControlLinkList.ToArray(),
                 allowReceiveStaffs = BussinessHandler_NextLink_ReceiveStaffs_Private(userId, registId, businessId, DataTypeHelper.GetStringValue(dtallowReceiveLinks.Rows[0]["环节ID"]), DataTypeHelper.GetStringValue(dtallowReceiveLinks.Rows[0]["任务"]), DataTypeHelper.GetStringValue(dtallowReceiveLinks.Rows[0]["人员ID"]), DataTypeHelper.GetStringValue(dtallowReceiveLinks.Rows[0]["操作人员限制"]), DataTypeHelper.GetStringValue(dtallowReceiveLinks.Rows[0]["指定角色成员ID"]), DataTypeHelper.GetStringValue(dtallowReceiveLinks.Rows[0]["经手人信息"]), lastInstanceId, department, secondDepartment, thirdDepartment, registerId) };
             StatusReport sr = new StatusReport();
             sr.status = "Success";
@@ -238,6 +265,92 @@ namespace HexiServer.Business
             sr.data = data;
             return sr;
         }
+
+
+        public static StatusReport BussinessHandler_Save_Notify(string instanceId, string userId, string leaveMessage, string archiving,
+           string docTableName, string docTableId, string tableUpdateData, string updateKeys)
+        {
+            string updateString = GetUpdateString(tableUpdateData, updateKeys);
+            //return null;
+            string sqlString = "[sp_extcall_业务处理保存_知会]";
+            SqlParameter spInstanceId = new SqlParameter("@实例ID", SqlDbType.Int);
+            SqlParameter spUserId = new SqlParameter("@用户ID", SqlDbType.Int);
+            SqlParameter spLeaveMessage = new SqlParameter("@留言", SqlDbType.NVarChar);
+            SqlParameter spArchiving = new SqlParameter("@是否归档", SqlDbType.Bit);
+            SqlParameter spDocTableName = new SqlParameter("@文档表名称", SqlDbType.NVarChar);
+            SqlParameter spDocTableId = new SqlParameter("@文档表ID", SqlDbType.Int);
+            SqlParameter spTableUpdateData = new SqlParameter("@表单更新数据", SqlDbType.NVarChar);
+
+            spInstanceId.Value = Convert.ToInt32(instanceId);
+            spUserId.Value = Convert.ToInt32(userId);
+            spLeaveMessage.Value = DataTypeHelper.GetDBValue(leaveMessage);
+            spArchiving.Value = Convert.ToByte(archiving);
+            spDocTableName.Value = DataTypeHelper.GetDBValue(docTableName);
+            spDocTableId.Value = Convert.ToInt32(docTableId);
+            spTableUpdateData.Value = DataTypeHelper.GetDBValue(updateString);
+
+            StatusReport sr = new StatusReport();
+            try
+            {
+                DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString, spInstanceId, spUserId, spLeaveMessage, spArchiving, spDocTableName,
+                spDocTableId, spTableUpdateData);
+                sr.status = "Success";
+                sr.result = "成功";
+                return sr;
+            }
+            catch (Exception e)
+            {
+                sr.status = "Fail";
+                sr.result = "知会操作失败：" + e.Message;
+                return sr;
+            }
+        }
+
+
+        public static StatusReport BussinessHandler_Save_Concurrent(string instanceId, string userId, string leaveMessage, string isDone,
+          string docTableName, string docTableId, string tableUpdateData, string updateKeys, string registId,
+          string transformConditionAndExplain, string transformStaffId)
+        {
+            string updateString = GetUpdateString(tableUpdateData, updateKeys);
+            //return null;
+            string sqlString = "[sp_extcall_业务处理保存_并行]";
+            SqlParameter spInstanceId = new SqlParameter("@实例ID", SqlDbType.Int);
+            SqlParameter spUserId = new SqlParameter("@用户ID", SqlDbType.Int);
+            SqlParameter spLeaveMessage = new SqlParameter("@留言", SqlDbType.NVarChar);
+            SqlParameter spIsDone = new SqlParameter("@是否归档", SqlDbType.Bit);
+            SqlParameter spDocTableName = new SqlParameter("@文档表名称", SqlDbType.NVarChar);
+            SqlParameter spDocTableId = new SqlParameter("@文档表ID", SqlDbType.Int);
+            SqlParameter spTableUpdateData = new SqlParameter("@表单更新数据", SqlDbType.NVarChar);
+            SqlParameter spTransformConditionAndExplain = new SqlParameter("@传递条件及说明", SqlDbType.NVarChar);
+            SqlParameter spTransformStaffId = new SqlParameter("@转移人ID", SqlDbType.Int);
+
+            spInstanceId.Value = Convert.ToInt32(instanceId);
+            spUserId.Value = Convert.ToInt32(userId);
+            spLeaveMessage.Value = DataTypeHelper.GetDBValue(leaveMessage);
+            spIsDone.Value = Convert.ToByte(isDone);
+            spDocTableName.Value = DataTypeHelper.GetDBValue(docTableName);
+            spDocTableId.Value = Convert.ToInt32(docTableId);
+            spTableUpdateData.Value = DataTypeHelper.GetDBValue(updateString);
+            spTransformConditionAndExplain.Value = DataTypeHelper.GetDBValue(transformConditionAndExplain);
+            spTransformStaffId.Value = Convert.ToInt32(transformStaffId);
+            StatusReport sr = new StatusReport();
+            try
+            {
+                DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString, spInstanceId, spUserId, spLeaveMessage, spIsDone, spDocTableName,
+                spDocTableId, spTableUpdateData, spTransformConditionAndExplain,spTransformStaffId);
+                sr.status = "Success";
+                sr.result = "成功";
+                return sr;
+            }
+            catch (Exception e)
+            {
+                sr.status = "Fail";
+                sr.result = "并行操作失败：" + e.Message;
+                return sr;
+            }
+        }
+
+
 
         public static StatusReport BussinessHandler_Save(string instanceId, string userId, string leaveMessage,
             string docTableName, string docTableId, string tableUpdateData, string updateKeys, string registId,
@@ -275,10 +388,10 @@ namespace HexiServer.Business
             spBusinessId.Value = Convert.ToInt32(businessId);
             spTableNumber.Value = DataTypeHelper.GetDBValue(tableNumber);
             //spNextControlLinkId.Value = DBNull.Value;
-            //spNextControlLink_UserId.Value = DBNull.Value;
             //spNextOutOfControlLinkIds.Value = DBNull.Value;
             //spNextOutOfControlLink_UserIds.Value = DBNull.Value;
             spNextControlLinkId.Value = Convert.ToInt32(nextControlLinkId);
+            //spNextControlLink_UserId.Value = DataTypeHelper.GetDBValue(nextControlLink_UserId);
             spNextOutOfControlLinkIds.Value = DataTypeHelper.GetDBValue(nextOutOfControlLinkIds);
             spNextOutOfControlLink_UserIds.Value = DataTypeHelper.GetAllowEmptyDBValue(nextOutOfControlLink_UserIds);
             if (Convert.ToInt32(nextControlLink_UserId) == 0)
@@ -511,9 +624,55 @@ namespace HexiServer.Business
         }
 
 
+
+        private static object[] BussinessHandler_RoleAndUserData(int linkUserId)
+        {
+            string sqlString = "[sp_extcall_业务任务处理_角色用户数据]";
+            SqlParameter spLinkUserId = new SqlParameter("@业务ID", SqlDbType.Int);
+
+            //spBusinessId.Value = 12;
+            //spTransferObjectId.Value = 28;
+            //spDocTableName.Value = "业务文档_请款单流程表";
+            spLinkUserId.Value = linkUserId;
+            //spTransferObjectId.Value = transferObjectId;
+            //spDocTableName.Value = docTableName;
+
+            DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString, spLinkUserId);
+            DataTable dtDefine = ds.Tables[0];
+            List<object> defineList = new List<object>();
+            foreach (DataRow dr in dtDefine.Rows)
+            {
+                var item = new
+                {
+                    id = DataTypeHelper.GetIntValue(dr["ID"]),
+                    taskExplain = DataTypeHelper.GetStringValue(dr["任务说明"]),
+                    checkResult = DataTypeHelper.GetStringValue(dr["审核结果"]),
+                    transferObjectId = DataTypeHelper.GetIntValue(dr["传递对象ID"]),
+                    receiveLinkId = DataTypeHelper.GetIntValue(dr["接收环节ID"]),
+                    receiveLinkIds = DataTypeHelper.GetStringValue(dr["接收环节IDs"]),
+                    //hiddenCondition = DataTypeHelper.GetStringValue(dr["隐藏条件"]),
+                    //selectCondition = DataTypeHelper.GetStringValue(dr["选择条件"]),
+                    isReadOnly = DataTypeHelper.GetBooleanValue(dr["只读性选择"]),
+                    //transConditionAndExplain = DataTypeHelper.GetStringValue(dr["传递条件及说明"])
+                };
+                defineList.Add(item);
+            }
+            //var data = new { checkDataDefines = defineList.ToArray() };
+            //StatusReport sr = new StatusReport();
+            //sr.status = "Success";
+            //sr.result = "Success";
+            //sr.data = data;
+            //return sr;
+            return defineList.ToArray();
+        }
+
+
         private static string GetUpdateString(string tableUpdateData, string updateDataKeys)
         {
-            
+            if (string.IsNullOrEmpty(updateDataKeys))
+            {
+                return null;
+            }
             JArray jArray = (JArray)JsonConvert.DeserializeObject(updateDataKeys);
             if (jArray.Count == 0)
             {

@@ -50,6 +50,13 @@ namespace HexiServer.Controllers
             return Json(sr, JsonRequestBehavior.AllowGet);
         }
 
+        public ActionResult BussinessHandler_Save_Notify(string instanceId, string userId, string leaveMessage, string needArchiving,
+          string docTableName, string docTableId, string tableUpdateData, string updateKeys)
+        {
+            StatusReport sr = ProcessDal.BussinessHandler_Save_Notify(instanceId, userId, leaveMessage, needArchiving, docTableName, docTableId, tableUpdateData, updateKeys);
+            return Json(sr, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult BussinessHandler_End(string instanceId, string userId, string leaveMessage, string isEnd,
           string docTableName, string docTableId, string updateData, string updateDataKeys, string registId,
           string transformConditionAndExplain)

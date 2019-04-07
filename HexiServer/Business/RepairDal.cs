@@ -27,15 +27,15 @@ namespace HexiServer.Business
                 " ID,部门,序号,地址,报修人,联系电话,服务项目,发单人,接单人,报修时间,派工时间,预约服务时间, " +
                 " 完成情况及所耗物料,操作人,完成时间,材料费,人工费,合计,收费类别,主管意见,服务台签字,客户意见, " +
                 " 目录显示,回访时间,回访意见,回访人,到场时间,状态,是否阅读,报修前照片1,报修前照片2,报修前照片3, " +
-                " 处理后照片1,处理后照片2,处理后照片3,报修处理时间,报修处理ID,网上报修时间,服务类别,紧急程度, " +
-                " 报修说明,谈好上门时间,报修来源,帐套代码,帐套名称 " +
+                " 处理后照片1,处理后照片2,处理后照片3,报修来源,报修处理时间,报修处理ID,网上报修时间,服务类别,紧急程度, " +
+                " 报修说明,谈好上门时间,帐套代码,帐套名称 " +
                 " FROM 小程序_工单管理 where 接单人 = @接单人 and 帐套代码 = @帐套代码 ";
             sqlString += orderStatusCondition;
             sqlString += (" order by " + orderType + " desc");
             //sqlString += orderType == "已完成" ? " order by 完成时间 desc " : " order by ID desc ";
             DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString,
                 new SqlParameter("@接单人", userCode),
-                new SqlParameter("@分类", ztcode),
+                new SqlParameter("@帐套代码", ztcode),
                 new SqlParameter("@状态", status));
 
             if (dt.Rows.Count == 0)
@@ -75,8 +75,8 @@ namespace HexiServer.Business
                     ServiceProject = DataTypeHelper.GetStringValue(row["服务项目"]),
                     ServiceCategory = DataTypeHelper.GetStringValue(row["服务类别"]),
                     Level = DataTypeHelper.GetStringValue(row["紧急程度"]),
-                    Identity = DataTypeHelper.GetStringValue(row["身份"]),
-                    NeedIn = DataTypeHelper.GetStringValue(row["是否入户"]),
+                    //Identity = DataTypeHelper.GetStringValue(row["身份"]),
+                    //NeedIn = DataTypeHelper.GetStringValue(row["是否入户"]),
                     RepairExplain = DataTypeHelper.GetStringValue(row["报修说明"]),
                     RepairTime = DataTypeHelper.GetDateStringValue(row["报修时间"]),
                     OrderTime = DataTypeHelper.GetDateStringValue(row["预约服务时间"]),
@@ -102,7 +102,7 @@ namespace HexiServer.Business
                     status = DataTypeHelper.GetStringValue(row["状态"])
                 };
                 //r.status = string.IsNullOrEmpty(r.AffirmComplete) ? r.status : "业主已确认";
-                r.status = string.IsNullOrEmpty(r.CallBackPerson) ? r.status : "已回访";
+                //r.status = string.IsNullOrEmpty(r.CallBackPerson) ? r.status : "已回访";
                 r.CompleteStatus = DataTypeHelper.GetStringValue(row["完成情况及所耗物料"]);
                 //r.LateTime = DataTypeHelper.GetDateStringValue(row["预计延期到"]);
                 //r.LateReason = DataTypeHelper.GetStringValue(row["延期原因"]);
@@ -135,7 +135,8 @@ namespace HexiServer.Business
         /// <param name="materialExpense"></param>
         /// /// <param name="status"></param>
         /// <returns></returns>
-        public static StatusReport SetRepairOrder(string id, string arriveTime, string completeTime, string completeStatus, string chargeType, string laborExpense, string materialExpense,string status, string lateReason,string lateTime, string isPaid)
+        //public static StatusReport SetRepairOrder(string id, string arriveTime, string completeTime, string completeStatus, string chargeType, string laborExpense, string materialExpense,string status, string lateReason,string lateTime, string isPaid)
+        public static StatusReport SetRepairOrder(string id, string arriveTime, string completeTime, string completeStatus, string chargeType, string laborExpense, string materialExpense,string status)
         {
             StatusReport sr = new StatusReport();
             string sqlString = 
@@ -148,23 +149,23 @@ namespace HexiServer.Business
                 "收费类别 = @收费类别, " +
                 "人工费 = @人工费, " +
                 "材料费 = @材料费, " +
-                "合计 = @合计, " +
-                "是否已收 = @是否已收, " +
-                "延期原因 = @延期原因, " +
-                "预计延期到 = @预计延期到 " +
+                "合计 = @合计 " +
+                //"是否已收 = @是否已收, " +
+                //"延期原因 = @延期原因, " +
+                //"预计延期到 = @预计延期到 " +
                 "where ID = @ID";
             sr = SQLHelper.Update("wyt", sqlString,
                 new SqlParameter("@到场时间", GetDBValue(arriveTime)),
                 new SqlParameter("@完成时间", GetDBValue(completeTime)),
                 new SqlParameter("@完成情况及所耗物料", GetDBValue(completeStatus)),
                 new SqlParameter("@状态", GetDBValue(status)),
-                new SqlParameter("@延期原因", GetDBValue(lateReason)),
-                new SqlParameter("@预计延期到", GetDBValue(lateTime)),
+                //new SqlParameter("@延期原因", GetDBValue(lateReason)),
+                //new SqlParameter("@预计延期到", GetDBValue(lateTime)),
                 new SqlParameter("@收费类别", GetDBValue(chargeType)),
                 new SqlParameter("@人工费",  laborExpense == "" ? 0 : Convert.ToDecimal(laborExpense)),
                 new SqlParameter("@材料费", materialExpense == "" ? 0 : Convert.ToDecimal(materialExpense)),
                 new SqlParameter("@合计", laborExpense == "" ? 0 : Convert.ToDecimal(laborExpense) + materialExpense == "" ? 0 : Convert.ToDecimal(materialExpense)),
-                new SqlParameter("@是否已收", GetDBValue(isPaid)),
+                //new SqlParameter("@是否已收", GetDBValue(isPaid)),
                 new SqlParameter("@ID", Convert.ToInt32(id)));
                 
             return sr;
