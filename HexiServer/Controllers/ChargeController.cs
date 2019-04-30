@@ -95,9 +95,9 @@ namespace HexiServer.Controllers
         }
 
 
-        public ActionResult OnGetChargeStatistics(string ztCode, string level, string userCode, string month)
-        {
-            return Json(ChargeDal.GetChargeStatistics(ztCode, level, userCode, month),JsonRequestBehavior.AllowGet);
-        }
+        //public ActionResult OnGetChargeStatistics(string ztCode, string level, string userCode, string month)
+        //{
+        //    return Json(ChargeDal.GetChargeStatistics(ztCode, level, userCode, month),JsonRequestBehavior.AllowGet);
+        //}
     }
 }

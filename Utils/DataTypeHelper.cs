@@ -80,7 +80,7 @@ namespace HexiUtils
 
 
         /// <summary>
-        /// 将数据库中取出的数据转换为double?类型
+        /// 将数据库中取出的数据转换为Decimal?类型
         /// </summary>
         /// <param name="row"></param>
         /// <returns></returns>
@@ -89,6 +89,24 @@ namespace HexiUtils
             if (row == DBNull.Value)
             {
                 return null;
+            }
+            else
+            {
+                return Convert.ToDecimal(row);
+            }
+        }
+
+
+        /// <summary>
+        /// 将数据库中取出的数据转换为非空Decimal?类型
+        /// </summary>
+        /// <param name="row"></param>
+        /// <returns></returns>
+        public static decimal? GetNotNullDecimalValue(object row)
+        {
+            if (row == DBNull.Value)
+            {
+                return 0;
             }
             else
             {

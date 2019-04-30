@@ -341,334 +341,590 @@ namespace HexiServer.Business
             return sr;
         }
 
-        public static StatusReport GetChargeStatistics(string ztCode, string level, string userCode, string month)
+        /// <summary>
+        /// 小程序_报表_考核_物业管理费绩效考核_全公司
+        /// </summary>
+        /// <param name="month"></param>
+        /// <returns></returns>
+        public static StatusReport GetChargeStatisticsCompany(string month)
         {
-            StatusReport sr = new StatusReport();
-            sr.status = "Fail";
-            sr.result = "未查询到任何数据";
-            switch (level)
+            string sqlString = "[dbo].[小程序_报表_考核_物业管理费绩效考核_全公司]";
+            SqlParameter spMonth = SQLHelper.setParameterValue("@统计月份", month, SqlDbType.NVarChar);
+
+            DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString, spMonth);
+            if (ds.Tables.Count < 2)
             {
-                case "一线":
-                    {
-                        string sqlString = " SELECT 所属组团, 实收当期合计," +
-                        " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
-                        " FROM dbo.视图_物业管理费绩效考核统计表_项目所有区 " +
-                        " WHERE (帐套代码 = @帐套代码) AND (所属组团 = @所属组团) AND (统计月份 = @统计月份) " +
-                        " ORDER BY 所属组团 ";
-                        DataTable dtGroup = SQLHelper.ExecuteQuery("weixin", sqlString,
-                            new SqlParameter("@帐套代码", ztCode),
-                            new SqlParameter("@所属组团", userCode),
-                            new SqlParameter("@统计月份", month));
-                        if (dtGroup.Rows.Count == 0)
-                        {
-                            return sr;
-                        }
-                        DataRow dr = dtGroup.Rows[0];
-                        ChargeStatisticsGroup csg = new ChargeStatisticsGroup();
-                        csg.group = DataTypeHelper.GetStringValue(dr["所属组团"]);
-                        csg.receivedNow = DataTypeHelper.GetDecimalValue(dr["实收当期合计"]);
-                        csg.nowShouldReceived = DataTypeHelper.GetDecimalValue(dr["当期应收"]);
-                        csg.addupShouldReceived = DataTypeHelper.GetDecimalValue(dr["累计应收"]);
-                        csg.addupReceived = DataTypeHelper.GetDecimalValue(dr["累计实收"]);
-                        csg.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(dr["实收后期应收"]);
-                        csg.addupNotReceived = (csg.addupShouldReceived.HasValue ? csg.addupShouldReceived.Value : 0) - (csg.addupReceived.HasValue ? csg.addupReceived.Value : 0);
-                        csg.rateNowReceived = GetPercent(csg.receivedNow, csg.nowShouldReceived);
-                        csg.rateAddupReceived = GetPercent(csg.addupReceived, csg.addupShouldReceived);
-                        csg.rateBeforeReceived = GetPercent(csg.receivedAfterShouldReceived, csg.nowShouldReceived);
-                        sqlString = " SELECT 所属组团,所属楼宇,实收当期合计," +
-                            " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
-                            " FROM dbo.视图_物业管理费绩效考核统计表_区中所有楼宇 " +
-                            " WHERE (帐套代码 = @帐套代码) AND (所属组团 = @所属组团) AND (统计月份 = @统计月份) " +
-                            " ORDER BY 所属组团,所属楼宇 ";
-                        DataTable dtbd = SQLHelper.ExecuteQuery("weixin", sqlString,
-                            new SqlParameter("@帐套代码", ztCode),
-                            new SqlParameter("@所属组团", userCode),
-                            new SqlParameter("@统计月份", month));
-                        if (dtbd.Rows.Count == 0)
-                        {
-                            return sr;
-                        }
-                        List<ChargeStatisticsBuilding> csbdList = new List<ChargeStatisticsBuilding>();
-                        for (int i = 0; i < dtbd.Rows.Count; i++)
-                        {
-                            DataRow drbd = dtbd.Rows[i];
-                            ChargeStatisticsBuilding csbd = new ChargeStatisticsBuilding();
-                            csbd.group = DataTypeHelper.GetStringValue(drbd["所属组团"]);
-                            csbd.building = DataTypeHelper.GetStringValue(drbd["所属楼宇"]);
-                            csbd.receivedNow = DataTypeHelper.GetDecimalValue(drbd["实收当期合计"]);
-                            csbd.nowShouldReceived = DataTypeHelper.GetDecimalValue(drbd["当期应收"]);
-                            csbd.addupShouldReceived = DataTypeHelper.GetDecimalValue(drbd["累计应收"]);
-                            csbd.addupReceived = DataTypeHelper.GetDecimalValue(drbd["累计实收"]);
-                            csbd.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drbd["实收后期应收"]);
-                            csbd.addupNotReceived = (csbd.addupShouldReceived.HasValue ? csbd.addupShouldReceived.Value : 0) - (csbd.addupReceived.HasValue ? csbd.addupReceived.Value : 0);
-                            csbd.rateNowReceived = GetPercent(csbd.receivedNow, csbd.nowShouldReceived);
-                            csbd.rateAddupReceived = GetPercent(csbd.addupReceived, csbd.addupShouldReceived);
-                            csbd.rateBeforeReceived = GetPercent(csbd.receivedAfterShouldReceived, csbd.nowShouldReceived);
-                            sqlString = " SELECT 所属组团,所属楼宇,所属单元,实收当期合计," +
-                            " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
-                            " FROM dbo.视图_物业管理费绩效考核统计表_楼宇中所有单元 " +
-                            " WHERE (帐套代码 = @帐套代码) AND (所属组团 = @所属组团) AND (所属楼宇 = @所属楼宇) AND (统计月份 = @统计月份) " +
-                            " ORDER BY 所属组团,所属楼宇,所属单元 ";
-                            DataTable dtUnit = SQLHelper.ExecuteQuery("weixin", sqlString,
-                                new SqlParameter("@帐套代码", ztCode),
-                                new SqlParameter("@所属组团", userCode),
-                                new SqlParameter("@所属楼宇", csbd.building),
-                                new SqlParameter("@统计月份", month));
-                            if (dtUnit.Rows.Count == 0)
-                            {
-                                return sr;
-                            }
-                            List<ChargeStatisticsUnit> csuList = new List<ChargeStatisticsUnit>();
-                            for (int j = 0; j < dtUnit.Rows.Count; j++)
-                            {
-                                DataRow drUnit = dtUnit.Rows[j];
-                                ChargeStatisticsUnit csu = new ChargeStatisticsUnit();
-                                csu.group = DataTypeHelper.GetStringValue(drUnit["所属组团"]);
-                                csu.building = DataTypeHelper.GetStringValue(drUnit["所属楼宇"]);
-                                csu.unit = DataTypeHelper.GetStringValue(drUnit["所属单元"]);
-                                csu.receivedNow = DataTypeHelper.GetDecimalValue(drUnit["实收当期合计"]);
-                                csu.nowShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["当期应收"]);
-                                csu.addupShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["累计应收"]);
-                                csu.addupReceived = DataTypeHelper.GetDecimalValue(drUnit["累计实收"]);
-                                csu.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["实收后期应收"]);
-                                csu.addupNotReceived = (csu.addupShouldReceived.HasValue ? csu.addupShouldReceived.Value : 0) - (csu.addupReceived.HasValue ? csu.addupReceived.Value : 0);
-                                csu.rateNowReceived = GetPercent(csu.receivedNow, csu.nowShouldReceived);
-                                csu.rateAddupReceived = GetPercent(csu.addupReceived, csu.addupShouldReceived);
-                                csu.rateBeforeReceived = GetPercent(csu.receivedAfterShouldReceived, csu.nowShouldReceived);
-                                csuList.Add(csu);
-                            }
-                            csbd.csUnits = csuList.ToArray();
-                            csbdList.Add(csbd);
-                        }
-                        csg.csBuildings = csbdList.ToArray();
-                        sr.status = "Success";
-                        sr.result = "成功";
-                        sr.data = csg;
-                    }
-                    break;
-                case "助理":
-                case "项目经理":
-                    {
-                        string sqlString = " SELECT 帐套名称, 实收当期合计," +
-                       " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
-                       " FROM dbo.视图_物业管理费绩效考核统计表_所有项目 " +
-                       " WHERE (帐套代码 = @帐套代码) AND (统计月份 = @统计月份) " +
-                       " ORDER BY 帐套代码 ";
-                        DataTable dtzt = SQLHelper.ExecuteQuery("weixin", sqlString,
-                            new SqlParameter("@帐套代码", ztCode),
-                            new SqlParameter("@统计月份", month));
-                        if (dtzt.Rows.Count == 0)
-                        {
-                            return sr;
-                        }
-                        DataRow dr = dtzt.Rows[0];
-                        ChargeStatisticsProject csp = new ChargeStatisticsProject();
-                        csp.ztName = DataTypeHelper.GetStringValue(dr["帐套名称"]);
-                        csp.receivedNow = DataTypeHelper.GetDecimalValue(dr["实收当期合计"]);
-                        csp.nowShouldReceived = DataTypeHelper.GetDecimalValue(dr["当期应收"]);
-                        csp.addupShouldReceived = DataTypeHelper.GetDecimalValue(dr["累计应收"]);
-                        csp.addupReceived = DataTypeHelper.GetDecimalValue(dr["累计实收"]);
-                        csp.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(dr["实收后期应收"]);
-                        csp.addupNotReceived = (csp.addupShouldReceived.HasValue ? csp.addupShouldReceived.Value : 0) - (csp.addupReceived.HasValue ? csp.addupReceived.Value : 0);
-                        csp.rateNowReceived = GetPercent(csp.receivedNow, csp.nowShouldReceived);
-                        csp.rateAddupReceived = GetPercent(csp.addupReceived, csp.addupShouldReceived);
-                        csp.rateBeforeReceived = GetPercent(csp.receivedAfterShouldReceived, csp.nowShouldReceived);
-
-                        sqlString = " SELECT 所属组团, 实收当期合计," +
-                        " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
-                        " FROM dbo.视图_物业管理费绩效考核统计表_项目所有区 " +
-                        " WHERE (帐套代码 = @帐套代码) AND (统计月份 = @统计月份) " +
-                        " ORDER BY 所属组团 ";
-                        DataTable dtGroup = SQLHelper.ExecuteQuery("weixin", sqlString,
-                            new SqlParameter("@帐套代码", ztCode),
-                            new SqlParameter("@统计月份", month));
-                        if (dtGroup.Rows.Count == 0)
-                        {
-                            return sr;
-                        }
-                        List<ChargeStatisticsGroup> csgList = new List<ChargeStatisticsGroup>();
-                        for(int k = 0; k < dtGroup.Rows.Count; k++)
-                        {
-                            DataRow drGroup = dtGroup.Rows[k];
-                            ChargeStatisticsGroup csg = new ChargeStatisticsGroup();
-                            csg.group = DataTypeHelper.GetStringValue(drGroup["所属组团"]);
-                            csg.receivedNow = DataTypeHelper.GetDecimalValue(drGroup["实收当期合计"]);
-                            csg.nowShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["当期应收"]);
-                            csg.addupShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["累计应收"]);
-                            csg.addupReceived = DataTypeHelper.GetDecimalValue(drGroup["累计实收"]);
-                            csg.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["实收后期应收"]);
-                            csg.addupNotReceived = (csg.addupShouldReceived.HasValue ? csg.addupShouldReceived.Value : 0) - (csg.addupReceived.HasValue ? csg.addupReceived.Value : 0);
-                            csg.rateNowReceived = GetPercent(csg.receivedNow, csg.nowShouldReceived);
-                            csg.rateAddupReceived = GetPercent(csg.addupReceived, csg.addupShouldReceived);
-                            csg.rateBeforeReceived = GetPercent(csg.receivedAfterShouldReceived, csg.nowShouldReceived);
-
-                            sqlString = " SELECT 所属组团,所属楼宇,实收当期合计," +
-                                " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
-                                " FROM dbo.视图_物业管理费绩效考核统计表_区中所有楼宇 " +
-                                " WHERE (帐套代码 = @帐套代码) AND (所属组团 = @所属组团) AND (统计月份 = @统计月份) " +
-                                " ORDER BY 所属组团,所属楼宇 ";
-                            DataTable dtbd = SQLHelper.ExecuteQuery("weixin", sqlString,
-                                new SqlParameter("@帐套代码", ztCode),
-                                new SqlParameter("@所属组团", csg.group),
-                                new SqlParameter("@统计月份", month));
-                            if (dtbd.Rows.Count == 0)
-                            {
-                                return sr;
-                            }
-                            List<ChargeStatisticsBuilding> csbdList = new List<ChargeStatisticsBuilding>();
-                            for (int i = 0; i < dtbd.Rows.Count; i++)
-                            {
-                                DataRow drbd = dtbd.Rows[i];
-                                ChargeStatisticsBuilding csbd = new ChargeStatisticsBuilding();
-                                csbd.group = DataTypeHelper.GetStringValue(drbd["所属组团"]);
-                                csbd.building = DataTypeHelper.GetStringValue(drbd["所属楼宇"]);
-                                csbd.receivedNow = DataTypeHelper.GetDecimalValue(drbd["实收当期合计"]);
-                                csbd.nowShouldReceived = DataTypeHelper.GetDecimalValue(drbd["当期应收"]);
-                                csbd.addupShouldReceived = DataTypeHelper.GetDecimalValue(drbd["累计应收"]);
-                                csbd.addupReceived = DataTypeHelper.GetDecimalValue(drbd["累计实收"]);
-                                csbd.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drbd["实收后期应收"]);
-                                csbd.addupNotReceived = (csbd.addupShouldReceived.HasValue ? csbd.addupShouldReceived.Value : 0) - (csbd.addupReceived.HasValue ? csbd.addupReceived.Value : 0);
-                                csbd.rateNowReceived = GetPercent(csbd.receivedNow, csbd.nowShouldReceived);
-                                csbd.rateAddupReceived = GetPercent(csbd.addupReceived, csbd.addupShouldReceived);
-                                csbd.rateBeforeReceived = GetPercent(csbd.receivedAfterShouldReceived, csbd.nowShouldReceived);
-                                sqlString = " SELECT 所属组团,所属楼宇,isnull(所属单元,'1') as 所属单元,实收当期合计," +
-                                " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
-                                " FROM dbo.视图_物业管理费绩效考核统计表_楼宇中所有单元 " +
-                                " WHERE (帐套代码 = @帐套代码) AND (所属组团 = @所属组团) AND (所属楼宇 = @所属楼宇) AND (统计月份 = @统计月份) " +
-                                " ORDER BY 所属组团,所属楼宇,所属单元 ";
-                                DataTable dtUnit = SQLHelper.ExecuteQuery("weixin", sqlString,
-                                    new SqlParameter("@帐套代码", ztCode),
-                                    new SqlParameter("@所属组团", csbd.group),
-                                    new SqlParameter("@所属楼宇", csbd.building),
-                                    new SqlParameter("@统计月份", month));
-                                if (dtUnit.Rows.Count == 0)
-                                {
-                                    return sr;
-                                }
-                                List<ChargeStatisticsUnit> csuList = new List<ChargeStatisticsUnit>();
-                                for (int j = 0; j < dtUnit.Rows.Count; j++)
-                                {
-                                    DataRow drUnit = dtUnit.Rows[j];
-                                    ChargeStatisticsUnit csu = new ChargeStatisticsUnit();
-                                    csu.group = DataTypeHelper.GetStringValue(drUnit["所属组团"]);
-                                    csu.building = DataTypeHelper.GetStringValue(drUnit["所属楼宇"]);
-                                    csu.unit = DataTypeHelper.GetStringValue(drUnit["所属单元"]);
-                                    csu.receivedNow = DataTypeHelper.GetDecimalValue(drUnit["实收当期合计"]);
-                                    csu.nowShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["当期应收"]);
-                                    csu.addupShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["累计应收"]);
-                                    csu.addupReceived = DataTypeHelper.GetDecimalValue(drUnit["累计实收"]);
-                                    csu.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["实收后期应收"]);
-                                    csu.addupNotReceived = (csu.addupShouldReceived.HasValue ? csu.addupShouldReceived.Value : 0) - (csu.addupReceived.HasValue ? csu.addupReceived.Value : 0);
-                                    csu.rateNowReceived = GetPercent(csu.receivedNow, csu.nowShouldReceived);
-                                    csu.rateAddupReceived = GetPercent(csu.addupReceived, csu.addupShouldReceived);
-                                    csu.rateBeforeReceived = GetPercent(csu.receivedAfterShouldReceived, csu.nowShouldReceived);
-                                    csuList.Add(csu);
-                                }
-                                csbd.csUnits = csuList.ToArray();
-                                csbdList.Add(csbd);
-                            }
-                            csg.csBuildings = csbdList.ToArray();
-                            csgList.Add(csg);
-                        }
-                        csp.csGroups = csgList.ToArray();
-                        sr.status = "Success";
-                        sr.result = "成功";
-                        sr.data = csp;
-                    }
-                    break;
-                case "公司":
-                    {
-                        string sqlString = " SELECT 实收当期合计," +
-                        " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
-                        " FROM dbo.视图_物业管理费绩效考核统计表_公司 " +
-                        " WHERE (统计月份 = @统计月份) ";
-                        DataTable dtCompany = SQLHelper.ExecuteQuery("weixin", sqlString,
-                            new SqlParameter("@统计月份", month));
-                        if (dtCompany.Rows.Count == 0)
-                        {
-                            return sr;
-                        }
-                        DataRow dr = dtCompany.Rows[0];
-                        ChargeStatisticsCompany csc = new ChargeStatisticsCompany();
-                        csc.receivedNow = DataTypeHelper.GetDecimalValue(dr["实收当期合计"]);
-                        csc.nowShouldReceived = DataTypeHelper.GetDecimalValue(dr["当期应收"]);
-                        csc.addupShouldReceived = DataTypeHelper.GetDecimalValue(dr["累计应收"]);
-                        csc.addupReceived = DataTypeHelper.GetDecimalValue(dr["累计实收"]);
-                        csc.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(dr["实收后期应收"]);
-                        csc.addupNotReceived = (csc.addupShouldReceived.HasValue ? csc.addupShouldReceived.Value : 0) - (csc.addupReceived.HasValue ? csc.addupReceived.Value : 0);
-                        csc.rateNowReceived = GetPercent(csc.receivedNow, csc.nowShouldReceived);
-                        csc.rateAddupReceived = GetPercent(csc.addupReceived, csc.addupShouldReceived);
-                        csc.rateBeforeReceived = GetPercent(csc.receivedAfterShouldReceived, csc.nowShouldReceived);
-                        sqlString = " SELECT 帐套代码,帐套名称,实收当期合计," +
-                            " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
-                            " FROM dbo.视图_物业管理费绩效考核统计表_所有项目 " +
-                            " WHERE (统计月份 = @统计月份) " +
-                            " ORDER BY 帐套代码";
-                        DataTable dtProject = SQLHelper.ExecuteQuery("weixin", sqlString,
-                            new SqlParameter("@统计月份", month));
-                        if (dtProject.Rows.Count == 0)
-                        {
-                            return sr;
-                        }
-                        List<ChargeStatisticsProject> cspList = new List<ChargeStatisticsProject>();
-                        for (int i = 0; i < dtProject.Rows.Count; i++)
-                        {
-                            DataRow drProject = dtProject.Rows[i];
-                            ChargeStatisticsProject csp = new ChargeStatisticsProject();
-                            csp.ztCode = DataTypeHelper.GetStringValue(drProject["帐套代码"]);
-                            csp.ztName = DataTypeHelper.GetStringValue(drProject["帐套名称"]);
-                            csp.receivedNow = DataTypeHelper.GetDecimalValue(drProject["实收当期合计"]);
-                            csp.nowShouldReceived = DataTypeHelper.GetDecimalValue(drProject["当期应收"]);
-                            csp.addupShouldReceived = DataTypeHelper.GetDecimalValue(drProject["累计应收"]);
-                            csp.addupReceived = DataTypeHelper.GetDecimalValue(drProject["累计实收"]);
-                            csp.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drProject["实收后期应收"]);
-                            csp.addupNotReceived = (csp.addupShouldReceived.HasValue ? csp.addupShouldReceived.Value : 0) - (csp.addupReceived.HasValue ? csp.addupReceived.Value : 0);
-                            csp.rateNowReceived = GetPercent(csp.receivedNow, csp.nowShouldReceived);
-                            csp.rateAddupReceived = GetPercent(csp.addupReceived, csp.addupShouldReceived);
-                            csp.rateBeforeReceived = GetPercent(csp.receivedAfterShouldReceived, csp.nowShouldReceived);
-
-                            sqlString = " SELECT 帐套名称,所属组团,实收当期合计," +
-                            " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
-                            " FROM dbo.视图_物业管理费绩效考核统计表_项目所有区 " +
-                            " WHERE (帐套代码 = @帐套代码) AND (统计月份 = @统计月份) " +
-                            " ORDER BY 所属组团 ";
-                            DataTable dtGroup = SQLHelper.ExecuteQuery("weixin", sqlString,
-                                new SqlParameter("@帐套代码", csp.ztCode),
-                                new SqlParameter("@统计月份", month));
-                            if (dtGroup.Rows.Count == 0)
-                            {
-                                return sr;
-                            }
-                            List<ChargeStatisticsGroup> csgList = new List<ChargeStatisticsGroup>();
-                            for (int j = 0; j < dtGroup.Rows.Count; j++)
-                            {
-                                DataRow drGroup = dtGroup.Rows[j];
-                                ChargeStatisticsGroup csg = new ChargeStatisticsGroup();
-                                csg.group = DataTypeHelper.GetStringValue(drGroup["所属组团"]);
-                                csg.ztName = DataTypeHelper.GetStringValue(drGroup["帐套名称"]);
-                                csg.receivedNow = DataTypeHelper.GetDecimalValue(drGroup["实收当期合计"]);
-                                csg.nowShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["当期应收"]);
-                                csg.addupShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["累计应收"]);
-                                csg.addupReceived = DataTypeHelper.GetDecimalValue(drGroup["累计实收"]);
-                                csg.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["实收后期应收"]);
-                                csg.addupNotReceived = (csg.addupShouldReceived.HasValue ? csg.addupShouldReceived.Value : 0) - (csg.addupReceived.HasValue ? csg.addupReceived.Value : 0);
-                                csg.rateNowReceived = GetPercent(csg.receivedNow, csg.nowShouldReceived);
-                                csg.rateAddupReceived = GetPercent(csg.addupReceived, csg.addupShouldReceived);
-                                csg.rateBeforeReceived = GetPercent(csg.receivedAfterShouldReceived, csg.nowShouldReceived);
-                                csgList.Add(csg);
-                            }
-                            csp.csGroups = csgList.ToArray();
-                            cspList.Add(csp);
-                        }
-                        csc.csProjects = cspList.ToArray();
-                        sr.status = "Success";
-                        sr.result = "成功";
-                        sr.data = csc;
-                    }
-                    break;
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
             }
+            DataTable dtCompany = ds.Tables[0];
+            if (dtCompany.Rows.Count == 0)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            DataRow drCompany = dtCompany.Rows[0];
+            var itemCompany = new
+            {
+                receivableYear = DataTypeHelper.GetStringValue(drCompany["本年应收"]),
+                receiptYear = DataTypeHelper.GetStringValue(drCompany["本年实收"]),
+                earlierStage = DataTypeHelper.GetStringValue(drCompany["追缴前期"]),
+                collectionRate = DataTypeHelper.GetStringValue(drCompany["本年收缴率"])
+            };
+
+            List<object> list = new List<object>();
+            DataTable dtProject = ds.Tables[1];
+            if (dtProject.Rows.Count != 0)
+            {
+                foreach (DataRow drProject in dtProject.Rows)
+                {
+                    var itemProject = new
+                    {
+                        ztCode = DataTypeHelper.GetStringValue(drProject["帐套代码"]),
+                        ztName = DataTypeHelper.GetStringValue(drProject["帐套名称"]),
+                        receivableYear = DataTypeHelper.GetStringValue(drProject["本年应收"]),
+                        receiptYear = DataTypeHelper.GetStringValue(drProject["本年实收"]),
+                        earlierStage = DataTypeHelper.GetStringValue(drProject["追缴前期"]),
+                        collectionRate = DataTypeHelper.GetStringValue(drProject["本年收缴率"])
+                    };
+                    list.Add(itemProject);
+                }
+            }
+            
+            StatusReport sr = new StatusReport();
+            sr.status = "Success";
+            sr.result = "Success";
+            sr.data = new { company = itemCompany, project = list.ToArray() };
             return sr;
         }
+
+        /// <summary>
+        /// 小程序_报表_考核_物业管理费绩效考核_管理处
+        /// </summary>
+        /// <param name="month"></param>
+        /// <param name="ztCode"></param>
+        /// <returns></returns>
+        public static StatusReport GetChargeStatisticsProject(string month, string ztCode)
+        {
+            string sqlString = "[dbo].[小程序_报表_考核_物业管理费绩效考核_管理处]";
+            SqlParameter spMonth = SQLHelper.setParameterValue("@统计月份", month, SqlDbType.NVarChar);
+            SqlParameter spZtcode = SQLHelper.setParameterValue("@帐套代码", ztCode, SqlDbType.NVarChar);
+
+            DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString, spMonth,spZtcode);
+            if (ds.Tables.Count < 1)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            DataTable dt = ds.Tables[0];
+            if (dt.Rows.Count == 0)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            DataRow dr = dt.Rows[0];
+            var item = new
+            {
+                receivableYear = DataTypeHelper.GetStringValue(dr["本年应收"]),
+                receiptYear = DataTypeHelper.GetStringValue(dr["本年实收"]),
+                earlierStage = DataTypeHelper.GetStringValue(dr["追缴前期"]),
+                collectionRate = DataTypeHelper.GetStringValue(dr["本年收缴率"])
+            };
+            StatusReport sr = new StatusReport();
+            sr.status = "Success";
+            sr.result = "Success";
+            sr.data = new { project = item};
+            return sr;
+        }
+
+        public static StatusReport GetMonthChargeStatistics(string ztcode, string level, string startTime)
+        {
+            string sqlString = "[dbo].[小程序_报表_财务_月收费统计_管理处]";
+            SqlParameter spStartTime = SQLHelper.setParameterValue("@统计开始时间", Convert.ToDateTime(startTime), SqlDbType.Date);
+            SqlParameter spZTCode = SQLHelper.setParameterValue("@帐套代码", ztcode, SqlDbType.NVarChar);
+            //SqlParameter spStartTime = new SqlParameter("@统计开始时间",SqlDbType.DateTime)
+
+            DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString, spStartTime, spZTCode);
+            DataTable dt = ds.Tables[0];
+            if (dt.Rows.Count == 0)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            List<object> list = new List<object>();
+            foreach (DataRow dr in dt.Rows)
+            {
+                var item = new
+                {
+                    chargeName = DataTypeHelper.GetStringValue(dr["费用名称"]),
+                    cashFooting = DataTypeHelper.GetNotNullDecimalValue(dr["现金实收合计"]),
+                    checkFooting = DataTypeHelper.GetNotNullDecimalValue(dr["支票实收合计"]),
+                    reduceDepositFooting = DataTypeHelper.GetNotNullDecimalValue(dr["预存扣减实收合计"]),
+                    otherFooting = DataTypeHelper.GetNotNullDecimalValue(dr["其他实收合计"]),
+                    overdueFineFooting = DataTypeHelper.GetNotNullDecimalValue(dr["滞纳金实收合计"]),
+                    allFooting = DataTypeHelper.GetNotNullDecimalValue(dr["实收总计"]),
+                    ztName = DataTypeHelper.GetStringValue(dr["帐套名称"]),
+                    type = DataTypeHelper.GetStringValue(dr["费用种类"]),
+                };
+                list.Add(item);
+            }
+            StatusReport sr = new StatusReport();
+            sr.status = "Success";
+            sr.result = "Success";
+            sr.data = list.ToArray();
+            return sr;
+        }
+        
+
+        public static StatusReport GetArrearageStatisticsProject(string ztcode, string month, string type)
+        {
+            string sqlString = "[dbo].[小程序_报表_财务_未收_欠款情况汇总_管理处]";
+            DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString,
+                SQLHelper.setParameterValue("@统计月份", month, SqlDbType.NVarChar),
+                SQLHelper.setParameterValue("@帐套代码", ztcode, SqlDbType.NVarChar),
+                 SQLHelper.setParameterValue("@占用者类别", type, SqlDbType.NVarChar));
+            if (ds.Tables.Count < 2)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            List<object> listCount = new List<object>();
+            List<object> listDetail = new List<object>();
+            DataTable dtCount = ds.Tables[0];
+            if (dtCount.Rows.Count == 0)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            //foreach (DataRow dr in dtCount.Rows)
+            //{
+            DataRow drCount = dtCount.Rows[0];
+                var itemCount = new
+                {
+                    countMonthArrearage = DataTypeHelper.GetNotNullDecimalValue(drCount["本月欠费合计"]),
+                    countCurrentArrearage = DataTypeHelper.GetNotNullDecimalValue(drCount["本期欠费合计"]),
+                    countYearArrearage = DataTypeHelper.GetNotNullDecimalValue(drCount["本年欠费合计"]),
+                    countTotalArrearage = DataTypeHelper.GetNotNullDecimalValue(drCount["累计欠费合计"]),
+                    ztName = DataTypeHelper.GetStringValue(drCount["帐套名称"]),
+                    type = DataTypeHelper.GetStringValue(drCount["占用者身份类别"])
+                };
+                //listCount.Add(item);
+            //}
+            DataTable dtDetail = ds.Tables[1];
+            if (dtDetail.Rows.Count > 0)
+            {
+                foreach (DataRow dr in dtDetail.Rows)
+                {
+                    var item = new
+                    {
+                        countMonthArrearage = DataTypeHelper.GetNotNullDecimalValue(dr["本月欠费合计"]),
+                        countCurrentArrearage = DataTypeHelper.GetNotNullDecimalValue(dr["本期欠费合计"]),
+                        countYearArrearage = DataTypeHelper.GetNotNullDecimalValue(dr["本年欠费合计"]),
+                        countTotalArrearage = DataTypeHelper.GetNotNullDecimalValue(dr["累计欠费合计"]),
+                        feeName = DataTypeHelper.GetStringValue(dr["费用名称"]),
+                        feeType = DataTypeHelper.GetStringValue(dr["费用种类"])
+                    };
+                    listDetail.Add(item);
+                }
+            }
+            StatusReport sr = new StatusReport();
+            sr.status = "Success";
+            sr.result = "Success";
+            sr.data = new { count = itemCount, detail = listDetail.ToArray() };
+            return sr;
+        }
+
+        public static StatusReport GetArrearageStatisticsCompany(string month, string type)
+        {
+            string sqlString = "[dbo].[小程序_报表_财务_未收_欠款情况汇总_全公司]";
+            DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString,
+                SQLHelper.setParameterValue("@统计月份", month, SqlDbType.NVarChar),
+                 SQLHelper.setParameterValue("@占用者类别", type, SqlDbType.NVarChar));
+            if (ds.Tables.Count < 3)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            List<object> listProject = new List<object>();
+            List<object> listDetail = new List<object>();
+            DataTable dtCount = ds.Tables[0];
+            if (dtCount.Rows.Count == 0)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            //foreach (DataRow dr in dtCount.Rows)
+            //{
+            DataRow drCount = dtCount.Rows[0];
+                var itemCount = new
+                {
+                    countMonthArrearage = DataTypeHelper.GetNotNullDecimalValue(drCount["本月欠费合计"]),
+                    countCurrentArrearage = DataTypeHelper.GetNotNullDecimalValue(drCount["本期欠费合计"]),
+                    countYearArrearage = DataTypeHelper.GetNotNullDecimalValue(drCount["本年欠费合计"]),
+                    countTotalArrearage = DataTypeHelper.GetNotNullDecimalValue(drCount["累计欠费合计"]),
+                    type = DataTypeHelper.GetStringValue(drCount["占用者身份类别"])
+                };
+                //listCount.Add(item);
+            //}
+            DataTable dtDetail = ds.Tables[1];
+            if (dtDetail.Rows.Count > 0)
+            {
+                foreach (DataRow dr in dtDetail.Rows)
+                {
+                    var item = new
+                    {
+                        countMonthArrearage = DataTypeHelper.GetNotNullDecimalValue(dr["本月欠费合计"]),
+                        countCurrentArrearage = DataTypeHelper.GetNotNullDecimalValue(dr["本期欠费合计"]),
+                        countYearArrearage = DataTypeHelper.GetNotNullDecimalValue(dr["本年欠费合计"]),
+                        countTotalArrearage = DataTypeHelper.GetNotNullDecimalValue(dr["累计欠费合计"]),
+                        feeName = DataTypeHelper.GetStringValue(dr["费用名称"]),
+                        feeType = DataTypeHelper.GetStringValue(dr["费用种类"])
+                    };
+                    listDetail.Add(item);
+                }
+            }
+            DataTable dtProject = ds.Tables[2];
+            if (dtDetail.Rows.Count > 0)
+            {
+                foreach (DataRow dr in dtProject.Rows)
+                {
+                    var item = new
+                    {
+                        ZTCode = DataTypeHelper.GetStringValue(dr["帐套代码"]),
+                        ZTName = DataTypeHelper.GetStringValue(dr["帐套名称"])
+                    };
+                    listProject.Add(item);
+                }
+            }
+            StatusReport sr = new StatusReport();
+            sr.status = "Success";
+            sr.result = "Success";
+            sr.data = new { count = itemCount, detail = listDetail.ToArray(), projects = listProject.ToArray() };
+            return sr;
+        }
+
+
+        //public static StatusReport GetChargeStatistics(string ztCode, string level, string userCode, string month)
+        //{
+        //    StatusReport sr = new StatusReport();
+        //    sr.status = "Fail";
+        //    sr.result = "未查询到任何数据";
+        //    switch (level)
+        //    {
+        //        case "一线":
+        //            {
+        //                string sqlString = " SELECT 所属组团, 实收当期合计," +
+        //                " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
+        //                " FROM dbo.视图_物业管理费绩效考核统计表_项目所有区 " +
+        //                " WHERE (帐套代码 = @帐套代码) AND (所属组团 = @所属组团) AND (统计月份 = @统计月份) " +
+        //                " ORDER BY 所属组团 ";
+        //                DataTable dtGroup = SQLHelper.ExecuteQuery("weixin", sqlString,
+        //                    new SqlParameter("@帐套代码", ztCode),
+        //                    new SqlParameter("@所属组团", userCode),
+        //                    new SqlParameter("@统计月份", month));
+        //                if (dtGroup.Rows.Count == 0)
+        //                {
+        //                    return sr;
+        //                }
+        //                DataRow dr = dtGroup.Rows[0];
+        //                ChargeStatisticsGroup csg = new ChargeStatisticsGroup();
+        //                csg.group = DataTypeHelper.GetStringValue(dr["所属组团"]);
+        //                csg.receivedNow = DataTypeHelper.GetDecimalValue(dr["实收当期合计"]);
+        //                csg.nowShouldReceived = DataTypeHelper.GetDecimalValue(dr["当期应收"]);
+        //                csg.addupShouldReceived = DataTypeHelper.GetDecimalValue(dr["累计应收"]);
+        //                csg.addupReceived = DataTypeHelper.GetDecimalValue(dr["累计实收"]);
+        //                csg.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(dr["实收后期应收"]);
+        //                csg.addupNotReceived = (csg.addupShouldReceived.HasValue ? csg.addupShouldReceived.Value : 0) - (csg.addupReceived.HasValue ? csg.addupReceived.Value : 0);
+        //                csg.rateNowReceived = GetPercent(csg.receivedNow, csg.nowShouldReceived);
+        //                csg.rateAddupReceived = GetPercent(csg.addupReceived, csg.addupShouldReceived);
+        //                csg.rateBeforeReceived = GetPercent(csg.receivedAfterShouldReceived, csg.nowShouldReceived);
+        //                sqlString = " SELECT 所属组团,所属楼宇,实收当期合计," +
+        //                    " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
+        //                    " FROM dbo.视图_物业管理费绩效考核统计表_区中所有楼宇 " +
+        //                    " WHERE (帐套代码 = @帐套代码) AND (所属组团 = @所属组团) AND (统计月份 = @统计月份) " +
+        //                    " ORDER BY 所属组团,所属楼宇 ";
+        //                DataTable dtbd = SQLHelper.ExecuteQuery("weixin", sqlString,
+        //                    new SqlParameter("@帐套代码", ztCode),
+        //                    new SqlParameter("@所属组团", userCode),
+        //                    new SqlParameter("@统计月份", month));
+        //                if (dtbd.Rows.Count == 0)
+        //                {
+        //                    return sr;
+        //                }
+        //                List<ChargeStatisticsBuilding> csbdList = new List<ChargeStatisticsBuilding>();
+        //                for (int i = 0; i < dtbd.Rows.Count; i++)
+        //                {
+        //                    DataRow drbd = dtbd.Rows[i];
+        //                    ChargeStatisticsBuilding csbd = new ChargeStatisticsBuilding();
+        //                    csbd.group = DataTypeHelper.GetStringValue(drbd["所属组团"]);
+        //                    csbd.building = DataTypeHelper.GetStringValue(drbd["所属楼宇"]);
+        //                    csbd.receivedNow = DataTypeHelper.GetDecimalValue(drbd["实收当期合计"]);
+        //                    csbd.nowShouldReceived = DataTypeHelper.GetDecimalValue(drbd["当期应收"]);
+        //                    csbd.addupShouldReceived = DataTypeHelper.GetDecimalValue(drbd["累计应收"]);
+        //                    csbd.addupReceived = DataTypeHelper.GetDecimalValue(drbd["累计实收"]);
+        //                    csbd.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drbd["实收后期应收"]);
+        //                    csbd.addupNotReceived = (csbd.addupShouldReceived.HasValue ? csbd.addupShouldReceived.Value : 0) - (csbd.addupReceived.HasValue ? csbd.addupReceived.Value : 0);
+        //                    csbd.rateNowReceived = GetPercent(csbd.receivedNow, csbd.nowShouldReceived);
+        //                    csbd.rateAddupReceived = GetPercent(csbd.addupReceived, csbd.addupShouldReceived);
+        //                    csbd.rateBeforeReceived = GetPercent(csbd.receivedAfterShouldReceived, csbd.nowShouldReceived);
+        //                    sqlString = " SELECT 所属组团,所属楼宇,所属单元,实收当期合计," +
+        //                    " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
+        //                    " FROM dbo.视图_物业管理费绩效考核统计表_楼宇中所有单元 " +
+        //                    " WHERE (帐套代码 = @帐套代码) AND (所属组团 = @所属组团) AND (所属楼宇 = @所属楼宇) AND (统计月份 = @统计月份) " +
+        //                    " ORDER BY 所属组团,所属楼宇,所属单元 ";
+        //                    DataTable dtUnit = SQLHelper.ExecuteQuery("weixin", sqlString,
+        //                        new SqlParameter("@帐套代码", ztCode),
+        //                        new SqlParameter("@所属组团", userCode),
+        //                        new SqlParameter("@所属楼宇", csbd.building),
+        //                        new SqlParameter("@统计月份", month));
+        //                    if (dtUnit.Rows.Count == 0)
+        //                    {
+        //                        return sr;
+        //                    }
+        //                    List<ChargeStatisticsUnit> csuList = new List<ChargeStatisticsUnit>();
+        //                    for (int j = 0; j < dtUnit.Rows.Count; j++)
+        //                    {
+        //                        DataRow drUnit = dtUnit.Rows[j];
+        //                        ChargeStatisticsUnit csu = new ChargeStatisticsUnit();
+        //                        csu.group = DataTypeHelper.GetStringValue(drUnit["所属组团"]);
+        //                        csu.building = DataTypeHelper.GetStringValue(drUnit["所属楼宇"]);
+        //                        csu.unit = DataTypeHelper.GetStringValue(drUnit["所属单元"]);
+        //                        csu.receivedNow = DataTypeHelper.GetDecimalValue(drUnit["实收当期合计"]);
+        //                        csu.nowShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["当期应收"]);
+        //                        csu.addupShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["累计应收"]);
+        //                        csu.addupReceived = DataTypeHelper.GetDecimalValue(drUnit["累计实收"]);
+        //                        csu.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["实收后期应收"]);
+        //                        csu.addupNotReceived = (csu.addupShouldReceived.HasValue ? csu.addupShouldReceived.Value : 0) - (csu.addupReceived.HasValue ? csu.addupReceived.Value : 0);
+        //                        csu.rateNowReceived = GetPercent(csu.receivedNow, csu.nowShouldReceived);
+        //                        csu.rateAddupReceived = GetPercent(csu.addupReceived, csu.addupShouldReceived);
+        //                        csu.rateBeforeReceived = GetPercent(csu.receivedAfterShouldReceived, csu.nowShouldReceived);
+        //                        csuList.Add(csu);
+        //                    }
+        //                    csbd.csUnits = csuList.ToArray();
+        //                    csbdList.Add(csbd);
+        //                }
+        //                csg.csBuildings = csbdList.ToArray();
+        //                sr.status = "Success";
+        //                sr.result = "成功";
+        //                sr.data = csg;
+        //            }
+        //            break;
+        //        case "助理":
+        //        case "项目经理":
+        //            {
+        //                string sqlString = " SELECT 帐套名称, 实收当期合计," +
+        //               " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
+        //               " FROM dbo.视图_物业管理费绩效考核统计表_所有项目 " +
+        //               " WHERE (帐套代码 = @帐套代码) AND (统计月份 = @统计月份) " +
+        //               " ORDER BY 帐套代码 ";
+        //                DataTable dtzt = SQLHelper.ExecuteQuery("weixin", sqlString,
+        //                    new SqlParameter("@帐套代码", ztCode),
+        //                    new SqlParameter("@统计月份", month));
+        //                if (dtzt.Rows.Count == 0)
+        //                {
+        //                    return sr;
+        //                }
+        //                DataRow dr = dtzt.Rows[0];
+        //                ChargeStatisticsProject csp = new ChargeStatisticsProject();
+        //                csp.ztName = DataTypeHelper.GetStringValue(dr["帐套名称"]);
+        //                csp.receivedNow = DataTypeHelper.GetDecimalValue(dr["实收当期合计"]);
+        //                csp.nowShouldReceived = DataTypeHelper.GetDecimalValue(dr["当期应收"]);
+        //                csp.addupShouldReceived = DataTypeHelper.GetDecimalValue(dr["累计应收"]);
+        //                csp.addupReceived = DataTypeHelper.GetDecimalValue(dr["累计实收"]);
+        //                csp.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(dr["实收后期应收"]);
+        //                csp.addupNotReceived = (csp.addupShouldReceived.HasValue ? csp.addupShouldReceived.Value : 0) - (csp.addupReceived.HasValue ? csp.addupReceived.Value : 0);
+        //                csp.rateNowReceived = GetPercent(csp.receivedNow, csp.nowShouldReceived);
+        //                csp.rateAddupReceived = GetPercent(csp.addupReceived, csp.addupShouldReceived);
+        //                csp.rateBeforeReceived = GetPercent(csp.receivedAfterShouldReceived, csp.nowShouldReceived);
+
+        //                sqlString = " SELECT 所属组团, 实收当期合计," +
+        //                " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
+        //                " FROM dbo.视图_物业管理费绩效考核统计表_项目所有区 " +
+        //                " WHERE (帐套代码 = @帐套代码) AND (统计月份 = @统计月份) " +
+        //                " ORDER BY 所属组团 ";
+        //                DataTable dtGroup = SQLHelper.ExecuteQuery("weixin", sqlString,
+        //                    new SqlParameter("@帐套代码", ztCode),
+        //                    new SqlParameter("@统计月份", month));
+        //                if (dtGroup.Rows.Count == 0)
+        //                {
+        //                    return sr;
+        //                }
+        //                List<ChargeStatisticsGroup> csgList = new List<ChargeStatisticsGroup>();
+        //                for(int k = 0; k < dtGroup.Rows.Count; k++)
+        //                {
+        //                    DataRow drGroup = dtGroup.Rows[k];
+        //                    ChargeStatisticsGroup csg = new ChargeStatisticsGroup();
+        //                    csg.group = DataTypeHelper.GetStringValue(drGroup["所属组团"]);
+        //                    csg.receivedNow = DataTypeHelper.GetDecimalValue(drGroup["实收当期合计"]);
+        //                    csg.nowShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["当期应收"]);
+        //                    csg.addupShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["累计应收"]);
+        //                    csg.addupReceived = DataTypeHelper.GetDecimalValue(drGroup["累计实收"]);
+        //                    csg.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["实收后期应收"]);
+        //                    csg.addupNotReceived = (csg.addupShouldReceived.HasValue ? csg.addupShouldReceived.Value : 0) - (csg.addupReceived.HasValue ? csg.addupReceived.Value : 0);
+        //                    csg.rateNowReceived = GetPercent(csg.receivedNow, csg.nowShouldReceived);
+        //                    csg.rateAddupReceived = GetPercent(csg.addupReceived, csg.addupShouldReceived);
+        //                    csg.rateBeforeReceived = GetPercent(csg.receivedAfterShouldReceived, csg.nowShouldReceived);
+
+        //                    sqlString = " SELECT 所属组团,所属楼宇,实收当期合计," +
+        //                        " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
+        //                        " FROM dbo.视图_物业管理费绩效考核统计表_区中所有楼宇 " +
+        //                        " WHERE (帐套代码 = @帐套代码) AND (所属组团 = @所属组团) AND (统计月份 = @统计月份) " +
+        //                        " ORDER BY 所属组团,所属楼宇 ";
+        //                    DataTable dtbd = SQLHelper.ExecuteQuery("weixin", sqlString,
+        //                        new SqlParameter("@帐套代码", ztCode),
+        //                        new SqlParameter("@所属组团", csg.group),
+        //                        new SqlParameter("@统计月份", month));
+        //                    if (dtbd.Rows.Count == 0)
+        //                    {
+        //                        return sr;
+        //                    }
+        //                    List<ChargeStatisticsBuilding> csbdList = new List<ChargeStatisticsBuilding>();
+        //                    for (int i = 0; i < dtbd.Rows.Count; i++)
+        //                    {
+        //                        DataRow drbd = dtbd.Rows[i];
+        //                        ChargeStatisticsBuilding csbd = new ChargeStatisticsBuilding();
+        //                        csbd.group = DataTypeHelper.GetStringValue(drbd["所属组团"]);
+        //                        csbd.building = DataTypeHelper.GetStringValue(drbd["所属楼宇"]);
+        //                        csbd.receivedNow = DataTypeHelper.GetDecimalValue(drbd["实收当期合计"]);
+        //                        csbd.nowShouldReceived = DataTypeHelper.GetDecimalValue(drbd["当期应收"]);
+        //                        csbd.addupShouldReceived = DataTypeHelper.GetDecimalValue(drbd["累计应收"]);
+        //                        csbd.addupReceived = DataTypeHelper.GetDecimalValue(drbd["累计实收"]);
+        //                        csbd.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drbd["实收后期应收"]);
+        //                        csbd.addupNotReceived = (csbd.addupShouldReceived.HasValue ? csbd.addupShouldReceived.Value : 0) - (csbd.addupReceived.HasValue ? csbd.addupReceived.Value : 0);
+        //                        csbd.rateNowReceived = GetPercent(csbd.receivedNow, csbd.nowShouldReceived);
+        //                        csbd.rateAddupReceived = GetPercent(csbd.addupReceived, csbd.addupShouldReceived);
+        //                        csbd.rateBeforeReceived = GetPercent(csbd.receivedAfterShouldReceived, csbd.nowShouldReceived);
+        //                        sqlString = " SELECT 所属组团,所属楼宇,isnull(所属单元,'1') as 所属单元,实收当期合计," +
+        //                        " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
+        //                        " FROM dbo.视图_物业管理费绩效考核统计表_楼宇中所有单元 " +
+        //                        " WHERE (帐套代码 = @帐套代码) AND (所属组团 = @所属组团) AND (所属楼宇 = @所属楼宇) AND (统计月份 = @统计月份) " +
+        //                        " ORDER BY 所属组团,所属楼宇,所属单元 ";
+        //                        DataTable dtUnit = SQLHelper.ExecuteQuery("weixin", sqlString,
+        //                            new SqlParameter("@帐套代码", ztCode),
+        //                            new SqlParameter("@所属组团", csbd.group),
+        //                            new SqlParameter("@所属楼宇", csbd.building),
+        //                            new SqlParameter("@统计月份", month));
+        //                        if (dtUnit.Rows.Count == 0)
+        //                        {
+        //                            return sr;
+        //                        }
+        //                        List<ChargeStatisticsUnit> csuList = new List<ChargeStatisticsUnit>();
+        //                        for (int j = 0; j < dtUnit.Rows.Count; j++)
+        //                        {
+        //                            DataRow drUnit = dtUnit.Rows[j];
+        //                            ChargeStatisticsUnit csu = new ChargeStatisticsUnit();
+        //                            csu.group = DataTypeHelper.GetStringValue(drUnit["所属组团"]);
+        //                            csu.building = DataTypeHelper.GetStringValue(drUnit["所属楼宇"]);
+        //                            csu.unit = DataTypeHelper.GetStringValue(drUnit["所属单元"]);
+        //                            csu.receivedNow = DataTypeHelper.GetDecimalValue(drUnit["实收当期合计"]);
+        //                            csu.nowShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["当期应收"]);
+        //                            csu.addupShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["累计应收"]);
+        //                            csu.addupReceived = DataTypeHelper.GetDecimalValue(drUnit["累计实收"]);
+        //                            csu.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drUnit["实收后期应收"]);
+        //                            csu.addupNotReceived = (csu.addupShouldReceived.HasValue ? csu.addupShouldReceived.Value : 0) - (csu.addupReceived.HasValue ? csu.addupReceived.Value : 0);
+        //                            csu.rateNowReceived = GetPercent(csu.receivedNow, csu.nowShouldReceived);
+        //                            csu.rateAddupReceived = GetPercent(csu.addupReceived, csu.addupShouldReceived);
+        //                            csu.rateBeforeReceived = GetPercent(csu.receivedAfterShouldReceived, csu.nowShouldReceived);
+        //                            csuList.Add(csu);
+        //                        }
+        //                        csbd.csUnits = csuList.ToArray();
+        //                        csbdList.Add(csbd);
+        //                    }
+        //                    csg.csBuildings = csbdList.ToArray();
+        //                    csgList.Add(csg);
+        //                }
+        //                csp.csGroups = csgList.ToArray();
+        //                sr.status = "Success";
+        //                sr.result = "成功";
+        //                sr.data = csp;
+        //            }
+        //            break;
+        //        case "公司":
+        //            {
+        //                string sqlString = " SELECT 实收当期合计," +
+        //                " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
+        //                " FROM dbo.视图_物业管理费绩效考核统计表_公司 " +
+        //                " WHERE (统计月份 = @统计月份) ";
+        //                DataTable dtCompany = SQLHelper.ExecuteQuery("weixin", sqlString,
+        //                    new SqlParameter("@统计月份", month));
+        //                if (dtCompany.Rows.Count == 0)
+        //                {
+        //                    return sr;
+        //                }
+        //                DataRow dr = dtCompany.Rows[0];
+        //                ChargeStatisticsCompany csc = new ChargeStatisticsCompany();
+        //                csc.receivedNow = DataTypeHelper.GetDecimalValue(dr["实收当期合计"]);
+        //                csc.nowShouldReceived = DataTypeHelper.GetDecimalValue(dr["当期应收"]);
+        //                csc.addupShouldReceived = DataTypeHelper.GetDecimalValue(dr["累计应收"]);
+        //                csc.addupReceived = DataTypeHelper.GetDecimalValue(dr["累计实收"]);
+        //                csc.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(dr["实收后期应收"]);
+        //                csc.addupNotReceived = (csc.addupShouldReceived.HasValue ? csc.addupShouldReceived.Value : 0) - (csc.addupReceived.HasValue ? csc.addupReceived.Value : 0);
+        //                csc.rateNowReceived = GetPercent(csc.receivedNow, csc.nowShouldReceived);
+        //                csc.rateAddupReceived = GetPercent(csc.addupReceived, csc.addupShouldReceived);
+        //                csc.rateBeforeReceived = GetPercent(csc.receivedAfterShouldReceived, csc.nowShouldReceived);
+        //                sqlString = " SELECT 帐套代码,帐套名称,实收当期合计," +
+        //                    " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
+        //                    " FROM dbo.视图_物业管理费绩效考核统计表_所有项目 " +
+        //                    " WHERE (统计月份 = @统计月份) " +
+        //                    " ORDER BY 帐套代码";
+        //                DataTable dtProject = SQLHelper.ExecuteQuery("weixin", sqlString,
+        //                    new SqlParameter("@统计月份", month));
+        //                if (dtProject.Rows.Count == 0)
+        //                {
+        //                    return sr;
+        //                }
+        //                List<ChargeStatisticsProject> cspList = new List<ChargeStatisticsProject>();
+        //                for (int i = 0; i < dtProject.Rows.Count; i++)
+        //                {
+        //                    DataRow drProject = dtProject.Rows[i];
+        //                    ChargeStatisticsProject csp = new ChargeStatisticsProject();
+        //                    csp.ztCode = DataTypeHelper.GetStringValue(drProject["帐套代码"]);
+        //                    csp.ztName = DataTypeHelper.GetStringValue(drProject["帐套名称"]);
+        //                    csp.receivedNow = DataTypeHelper.GetDecimalValue(drProject["实收当期合计"]);
+        //                    csp.nowShouldReceived = DataTypeHelper.GetDecimalValue(drProject["当期应收"]);
+        //                    csp.addupShouldReceived = DataTypeHelper.GetDecimalValue(drProject["累计应收"]);
+        //                    csp.addupReceived = DataTypeHelper.GetDecimalValue(drProject["累计实收"]);
+        //                    csp.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drProject["实收后期应收"]);
+        //                    csp.addupNotReceived = (csp.addupShouldReceived.HasValue ? csp.addupShouldReceived.Value : 0) - (csp.addupReceived.HasValue ? csp.addupReceived.Value : 0);
+        //                    csp.rateNowReceived = GetPercent(csp.receivedNow, csp.nowShouldReceived);
+        //                    csp.rateAddupReceived = GetPercent(csp.addupReceived, csp.addupShouldReceived);
+        //                    csp.rateBeforeReceived = GetPercent(csp.receivedAfterShouldReceived, csp.nowShouldReceived);
+
+        //                    sqlString = " SELECT 帐套名称,所属组团,实收当期合计," +
+        //                    " 当期应收,累计应收,累计实收,实收后期应收,统计月份 " +
+        //                    " FROM dbo.视图_物业管理费绩效考核统计表_项目所有区 " +
+        //                    " WHERE (帐套代码 = @帐套代码) AND (统计月份 = @统计月份) " +
+        //                    " ORDER BY 所属组团 ";
+        //                    DataTable dtGroup = SQLHelper.ExecuteQuery("weixin", sqlString,
+        //                        new SqlParameter("@帐套代码", csp.ztCode),
+        //                        new SqlParameter("@统计月份", month));
+        //                    if (dtGroup.Rows.Count == 0)
+        //                    {
+        //                        return sr;
+        //                    }
+        //                    List<ChargeStatisticsGroup> csgList = new List<ChargeStatisticsGroup>();
+        //                    for (int j = 0; j < dtGroup.Rows.Count; j++)
+        //                    {
+        //                        DataRow drGroup = dtGroup.Rows[j];
+        //                        ChargeStatisticsGroup csg = new ChargeStatisticsGroup();
+        //                        csg.group = DataTypeHelper.GetStringValue(drGroup["所属组团"]);
+        //                        csg.ztName = DataTypeHelper.GetStringValue(drGroup["帐套名称"]);
+        //                        csg.receivedNow = DataTypeHelper.GetDecimalValue(drGroup["实收当期合计"]);
+        //                        csg.nowShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["当期应收"]);
+        //                        csg.addupShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["累计应收"]);
+        //                        csg.addupReceived = DataTypeHelper.GetDecimalValue(drGroup["累计实收"]);
+        //                        csg.receivedAfterShouldReceived = DataTypeHelper.GetDecimalValue(drGroup["实收后期应收"]);
+        //                        csg.addupNotReceived = (csg.addupShouldReceived.HasValue ? csg.addupShouldReceived.Value : 0) - (csg.addupReceived.HasValue ? csg.addupReceived.Value : 0);
+        //                        csg.rateNowReceived = GetPercent(csg.receivedNow, csg.nowShouldReceived);
+        //                        csg.rateAddupReceived = GetPercent(csg.addupReceived, csg.addupShouldReceived);
+        //                        csg.rateBeforeReceived = GetPercent(csg.receivedAfterShouldReceived, csg.nowShouldReceived);
+        //                        csgList.Add(csg);
+        //                    }
+        //                    csp.csGroups = csgList.ToArray();
+        //                    cspList.Add(csp);
+        //                }
+        //                csc.csProjects = cspList.ToArray();
+        //                sr.status = "Success";
+        //                sr.result = "成功";
+        //                sr.data = csc;
+        //            }
+        //            break;
+        //    }
+        //    return sr;
+        //}
+
+
 
         //public static StatusReport GetGroupChargeStatistics(string ztCode, string userCode, string month)
         //{

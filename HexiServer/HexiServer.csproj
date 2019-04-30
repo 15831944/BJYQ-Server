@@ -125,6 +125,7 @@
     <Compile Include="Controllers\ComplainController.cs" />
     <Compile Include="Controllers\DecorationController.cs" />
     <Compile Include="Controllers\EquipmentController.cs" />
+    <Compile Include="Controllers\FilesController.cs" />
     <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Controllers\LookOverController.cs" />
     <Compile Include="Controllers\ProcessController.cs" />
@@ -160,6 +161,7 @@
     <Content Include="Views\web.config" />
     <Content Include="packages.config" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
+    <Content Include="Views\Files\FilesView.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

@@ -131,6 +131,22 @@ namespace HexiServer.Business
                     {
                         content = DataTypeHelper.GetDateStringValue(dr[columnName]);
                     }
+                    //else if (columnName.Contains("附件"))
+                    //{
+                    //    string columnValue = DataTypeHelper.GetStringValue(dr[columnName]);//获取对应列的值
+                    //    if (columnValue.Contains("-") && columnValue.Contains("|"))//如果值中存在-和|，执行以下操作
+                    //    {
+                    //        string docValue = columnValue.Split('-')[columnValue.Split('-').Length - 1];//获取最后一个 “-” 后的所有字符
+                    //        string[] splitArr = docValue.Split('|');
+                    //        string fileName = splitArr[splitArr.Length - 1];
+                    //        string recordId = splitArr[splitArr.Length - 2];
+                    //        content = docTableName + "\\" + recordId + "\\" + fileName;
+                    //    }
+                    //    else
+                    //    {
+                    //        content = "";
+                    //    }
+                    //}
                     else
                     {
                         content = dr[columnName];
@@ -157,7 +173,8 @@ namespace HexiServer.Business
                     fieldSourceName = DataTypeHelper.GetStringValue(dr["字段源名称"]),
                     required = DataTypeHelper.GetBooleanValue(dr["必填列"]),
                     defaultValue = DataTypeHelper.GetStringValue(dr["默认写入值"]),
-                    allowEdit = DataTypeHelper.GetBooleanValue(dr["允许编辑"])
+                    allowEdit = DataTypeHelper.GetBooleanValue(dr["允许编辑"]),
+                    isFile = DataTypeHelper.GetBooleanValue(dr["是否文件字段"])
                 };
                 defineList.Add(item);
             }
@@ -166,7 +183,7 @@ namespace HexiServer.Business
             sr.result = "Success";
             if (transferObjectType == "Decision")
             {
-                sr.data = new { items = itemList.ToArray(), defines = defineList.ToArray(), checkDataDefines = BussinessHandler_CheckData(Convert.ToInt32(businessId), Convert.ToInt32(transferObjectId), docTableName) };
+                sr.data = new { items = itemList.ToArray(), defines = defineList.ToArray(), checkDataDefines = BussinessHandler_CheckData(Convert.ToInt32(businessId), Convert.ToInt32(transferObjectId), docTableName,Convert.ToInt32(docTableId)) };
             }
             if (objectType == "Terminator")
             {
@@ -221,7 +238,8 @@ namespace HexiServer.Business
                         operationStaffLimit = DataTypeHelper.GetStringValue(dr["操作人员限制"]),
                         selectedRoleMemberId = DataTypeHelper.GetIntValue(dr["指定角色成员ID"]),
                         staffHandling = DataTypeHelper.GetStringValue(dr["经手人信息"]),
-                        staffHandled = DataTypeHelper.GetStringValue(dr["曾经经手"])
+                        staffHandled = DataTypeHelper.GetStringValue(dr["曾经经手"]),
+                        userChecked = true
                     };
                     outOfControlLinkList.Add(item);
                 }
@@ -500,7 +518,7 @@ namespace HexiServer.Business
 
 
 
-        private static object[] BussinessHandler_CheckData(int businessId, int transferObjectId, string docTableName)
+        private static object[] BussinessHandler_CheckData(int businessId, int transferObjectId, string docTableName, int docTableId)
         {
             string sqlString = "[sp_extcall_业务任务处理_审核数据]";
             SqlParameter spBusinessId = new SqlParameter("@业务ID", SqlDbType.Int);
@@ -519,6 +537,27 @@ namespace HexiServer.Business
             List<object> defineList = new List<object>();
             foreach (DataRow dr in dtDefine.Rows)
             {
+                string hiddenConditon = DataTypeHelper.GetStringValue(dr["隐藏条件"]);
+                if (!string.IsNullOrEmpty(hiddenConditon))
+                {
+                    string hiddenSqlString = "select ID from " + docTableName + " where ID = " + docTableId + " and (" + hiddenConditon + ")";//根据隐藏条件查询
+                    int result = SQLHelper.ExecuteScalar("wyt", hiddenSqlString);
+                    if (result > 0)
+                    {
+                        continue;
+                    }
+                }
+                string selectCondition = DataTypeHelper.GetStringValue(dr["选择条件"]);
+                bool isSelect = false;
+                if (!string.IsNullOrEmpty(selectCondition))
+                {
+                    string selectSqlString = "select ID from " + docTableName + " where ID = " + docTableId + " and (" + selectCondition + ")";//根据选择条件查询
+                    int result = SQLHelper.ExecuteScalar("wyt", selectSqlString);
+                    if (result > 0)
+                    {
+                        isSelect = true;
+                    }
+                }
                 var item = new
                 {
                     id = DataTypeHelper.GetIntValue(dr["ID"]),
@@ -527,10 +566,11 @@ namespace HexiServer.Business
                     transferObjectId = DataTypeHelper.GetIntValue(dr["传递对象ID"]),
                     receiveLinkId = DataTypeHelper.GetIntValue(dr["接收环节ID"]),
                     receiveLinkIds = DataTypeHelper.GetStringValue(dr["接收环节IDs"]),
-                    //hiddenCondition = DataTypeHelper.GetStringValue(dr["隐藏条件"]),
-                    //selectCondition = DataTypeHelper.GetStringValue(dr["选择条件"]),
+                    hiddenCondition = DataTypeHelper.GetStringValue(dr["隐藏条件"]),
+                    selectCondition = DataTypeHelper.GetStringValue(dr["选择条件"]),
                     isReadOnly = DataTypeHelper.GetBooleanValue(dr["只读性选择"]),
-                    //transConditionAndExplain = DataTypeHelper.GetStringValue(dr["传递条件及说明"])
+                    transConditionAndExplain = DataTypeHelper.GetStringValue(dr["传递条件及说明"]),
+                    isSelect = isSelect
                 };
                 defineList.Add(item);
             }
@@ -542,6 +582,23 @@ namespace HexiServer.Business
             //return sr;
             return defineList.ToArray();
         }
+
+        /// <summary>
+        /// 判断该结果是否可选
+        /// </summary>
+        //public static object[] CheckSelectCondition(string docTableName, int docTableId, string selectCondition)
+        //{
+        //    bool isSelect = false;
+        //    if (!string.IsNullOrEmpty(selectCondition))
+        //    {
+        //        string selectSqlString = "select ID from " + docTableName + " where ID = " + docTableId + "(" + selectCondition + ")";//根据选择条件查询
+        //        int result = SQLHelper.ExecuteScalar("wyt", selectSqlString);
+        //        if (result > 0)
+        //        {
+        //            isSelect = true;
+        //        }
+        //    }
+        //}
 
 
         private static object[] BussinessHandler_NextLink_ReceiveStaffs_Private(string userId, string registId, string businessId, string linkId, string task, string staffId, string operatorLimit, string roleMemberId, string handlerInfo, string lastInstanceId, string department, string secondDepartment, string thirdDepartment, string registerId)

@@ -35,7 +35,7 @@ namespace HexiServer.Business
             }
             string sqlstring = " SELECT ID, 分类, 设备运行编号, 设备编号, 设备型号, 设备名称, 系统名称, 出厂日期, " +
                                " 使用日期, 设备价格, 出厂序号, 设计寿命, 卡号, 安装地点, 产地, 设备保养管理代号, 设备保养管理内容, " +
-                               " 设备保养管理日期, 工作名称, 工作日期, 是否完成, 录入日期, 录入人, 完成说明, 序次, 保养前照片, 保养中照片, 保养后照片, " +
+                               " 设备保养管理日期, 工作名称, 工作日期, 是否完成, 录入日期, 录入人, 完成说明, 序次, 保养前照片, 保养后照片, " +
                                " 宽限上延天数,宽限下延天数 " +
                                " FROM dbo.小程序_设备管理 ";
             sqlstring += done;
@@ -76,7 +76,7 @@ namespace HexiServer.Business
                 equipment.InputMan = DataTypeHelper.GetStringValue(dr["录入人"]);
                 equipment.DoneInfo = DataTypeHelper.GetStringValue(dr["完成说明"]);
                 equipment.BeforeImage = DataTypeHelper.GetStringValue(dr["保养前照片"]);
-                equipment.MiddleImage = DataTypeHelper.GetStringValue(dr["保养中照片"]);
+                //equipment.MiddleImage = DataTypeHelper.GetStringValue(dr["保养中照片"]);
                 equipment.AfterImage = DataTypeHelper.GetStringValue(dr["保养后照片"]);
                 equipment.Order = DataTypeHelper.GetBooleanValue(dr["序次"]) == true ? "1" : "0";
                 equipment.BeforeDays = DataTypeHelper.GetIntValue(dr["宽限上延天数"]);
@@ -120,15 +120,15 @@ namespace HexiServer.Business
             {
                 sqlstring = "update dbo.小程序_设备管理 set 保养后照片 = @保养后照片 where ID = @ID";
             }
-            else
-            {
-                sqlstring = "update dbo.小程序_设备管理 set 保养中照片 = @保养中照片 where ID = @ID";
-            }
+            //else
+            //{
+            //    sqlstring = "update dbo.小程序_设备管理 set 保养中照片 = @保养中照片 where ID = @ID";
+            //}
 
             sr = SQLHelper.Update("wyt", sqlstring,
                 new SqlParameter("@保养前照片", imagePath),
                 new SqlParameter("@保养后照片", imagePath),
-                new SqlParameter("@保养中照片", imagePath),
+                //new SqlParameter("@保养中照片", imagePath),
                 new SqlParameter("@ID", id));
             return sr;
         }
