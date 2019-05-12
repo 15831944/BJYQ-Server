@@ -17,19 +17,6 @@ namespace HexiUtils
 
         }
 
-        //public StatusReport(string status)
-        //{
-        //    this.status = status;
-        //    if (status == "Success")
-        //    {
-        //        this.result = "成功";
-        //    }
-        //    if (status == "Fail")
-        //    {
-        //        this.result = "未查询到任何数据";
-        //    }
-        //}
-
         public StatusReport(object data)
         {
             this.status = "Success";

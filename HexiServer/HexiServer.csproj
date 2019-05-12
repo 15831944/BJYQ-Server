@@ -112,6 +112,7 @@
     <Compile Include="Business\EmployeeDal.cs" />
     <Compile Include="Business\EquipmentDal.cs" />
     <Compile Include="Business\LookOverDal.cs" />
+    <Compile Include="Business\PatrolDal.cs" />
     <Compile Include="Business\ProcessDal.cs" />
     <Compile Include="Business\ProprietorDal.cs" />
     <Compile Include="Business\RepairDal.cs" />
@@ -128,6 +129,7 @@
     <Compile Include="Controllers\FilesController.cs" />
     <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Controllers\LookOverController.cs" />
+    <Compile Include="Controllers\PatrolController.cs" />
     <Compile Include="Controllers\ProcessController.cs" />
     <Compile Include="Controllers\ProprietorController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
@@ -178,6 +180,7 @@
     <Folder Include="Views\Equipment\" />
     <Folder Include="Views\Image\" />
     <Folder Include="Views\LookOver\" />
+    <Folder Include="Views\Patrol\" />
     <Folder Include="Views\Process\" />
     <Folder Include="Views\Proprietor\" />
     <Folder Include="Views\Report\" />

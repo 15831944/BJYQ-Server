@@ -29,7 +29,8 @@ namespace HexiServer.Business
                 " 目录显示,回访时间,回访意见,回访人,到场时间,状态,是否阅读,报修前照片1,报修前照片2,报修前照片3, " +
                 " 处理后照片1,处理后照片2,处理后照片3,报修来源,报修处理时间,报修处理ID,网上报修时间,服务类别,紧急程度, " +
                 " 报修说明,谈好上门时间,帐套代码,帐套名称 " +
-                " FROM 小程序_工单管理 where 接单人 = @接单人 and 帐套代码 = @帐套代码 ";
+            " FROM 小程序_工单管理 where 帐套代码 = @帐套代码 ";
+            //" FROM 小程序_工单管理 where 接单人 = @接单人 and 帐套代码 = @帐套代码 ";
             sqlString += orderStatusCondition;
             sqlString += (" order by " + orderType + " desc");
             //sqlString += orderType == "已完成" ? " order by 完成时间 desc " : " order by ID desc ";

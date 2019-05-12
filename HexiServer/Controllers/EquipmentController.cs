@@ -18,16 +18,16 @@ namespace HexiServer.Controllers
         /// <param name="isDone"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult OnGetEquipment(string classify, string isDone)
+        public ActionResult OnGetEquipment(string classify, string status)
         {
             StatusReport sr = new StatusReport();
-            if (string.IsNullOrEmpty(classify) || string.IsNullOrEmpty(isDone))
+            if (string.IsNullOrEmpty(classify) || string.IsNullOrEmpty(status))
             {
                 sr.status = "Fail";
                 sr.result = "信息不完整";
                 return Json(sr);
             }
-            sr = EquipmentDal.GetEquipment(classify, isDone);
+            sr = EquipmentDal.GetEquipment(classify, status);
             return Json(sr);
         }
 

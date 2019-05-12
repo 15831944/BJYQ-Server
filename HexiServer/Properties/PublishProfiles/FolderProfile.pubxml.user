@@ -11,16 +11,16 @@
   </PropertyGroup>
   <ItemGroup>
     <File Include="bin/HexiServer.dll">
-      <publishTime>04/30/2019 21:10:30</publishTime>
+      <publishTime>05/07/2019 11:13:42</publishTime>
     </File>
     <File Include="bin/HexiServer.pdb">
-      <publishTime>04/30/2019 21:10:30</publishTime>
+      <publishTime>05/07/2019 11:13:42</publishTime>
     </File>
     <File Include="bin/HexiUtils.dll">
-      <publishTime>04/30/2019 21:10:29</publishTime>
+      <publishTime>05/05/2019 16:41:50</publishTime>
     </File>
     <File Include="bin/HexiUtils.pdb">
-      <publishTime>04/30/2019 21:10:29</publishTime>
+      <publishTime>05/05/2019 16:41:50</publishTime>
     </File>
     <File Include="bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll">
       <publishTime>08/15/2017 13:12:32</publishTime>

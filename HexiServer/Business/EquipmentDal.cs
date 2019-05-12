@@ -11,11 +11,11 @@ namespace HexiServer.Business
 {
     public class EquipmentDal
     {
-        public static StatusReport GetEquipment(string classify, string isDone)
+        public static StatusReport GetEquipment(string classify, string status)
         {
             StatusReport sr = new StatusReport();
             string done = "";
-            if (isDone == "0")//待处理
+            if (status == "0")//待处理
             {
                 done = " where (分类 = @分类) AND 是否完成 is null " +
                     " and (CONVERT(nvarchar, 工作日期, 111) = CONVERT(nvarchar, GETDATE(), 111) " +
@@ -23,7 +23,7 @@ namespace HexiServer.Business
                     " or (datediff(day,GETDATE(),工作日期)<=宽限下延天数) and datediff(day,GETDATE(),工作日期)>=0) " +
                     " ORDER BY ID DESC";
             }
-            else if (isDone == "1")//已处理
+            else if (status == "1")//已处理
             {
                 done = " where  (分类 = @分类)  AND  (是否完成 = 1) ORDER BY ID DESC ";
             }
