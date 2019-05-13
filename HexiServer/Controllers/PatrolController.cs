@@ -21,16 +21,10 @@ namespace HexiServer.Controllers
         /// <param name="classify"></param>
         /// <param name="time"></param>
         /// <returns></returns>
-        public ActionResult OnSetPatrol(string name, string address, string detail, string classify, string time)
+        public ActionResult OnSetPatrol(string classify, string ztName, string name, string phone, string address, string content)
         {
             StatusReport sr = new StatusReport();
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(address) || string.IsNullOrEmpty(detail) || string.IsNullOrEmpty(classify) || string.IsNullOrEmpty(time))
-            {
-                sr.status = "Fail";
-                sr.result = "信息不完整";
-                return Json(sr);
-            }
-            sr = RepairDal.SetPatrol(name, address, detail, classify, time);
+            sr = PatrolDal.SetPatrol(classify,ztName,name,phone,address,content);
             return Json(sr);
         }
 
@@ -74,9 +68,9 @@ namespace HexiServer.Controllers
                 HttpPostedFileBase uploadImage = (Request.Files[0]);
                 uploadImage.SaveAs(imagePath);
                 string ID = Request.Form["id"];
-                string func = Request.Form["func"];//a
+                //string func = Request.Form["func"];//a
                 string index = Request.Form["index"];
-                sr = RepairDal.SetPatrolImage(func, ID, index, sqlImagePath);
+                sr = PatrolDal.SetPatrolImage(ID, index, sqlImagePath);
                 return Json(sr);
             }
             catch (NotImplementedException exp)

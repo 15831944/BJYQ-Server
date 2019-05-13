@@ -87,45 +87,7 @@ namespace HexiServer.Business
             sr.data = chargedList.ToArray();
             return sr;
         }
-
-        public static StatusReport GetChargeList(string homeNumber, string name, string ztcode, string buildingNumber)
-        {
-            StatusReport sr = new StatusReport();
-            string sqlString = "SELECT 资源编号, 占用者名称, SUM(应收金额) AS 已收总额, 帐套代码 " +
-                                "FROM 小程序_未收查询 " +
-                                "WHERE 帐套代码 = " + ztcode +
-                                " and 收费状态 is null " +
-                                (string.IsNullOrEmpty(homeNumber) ? "" : "and (资源编号 like '%" + homeNumber + "%') ") +
-                                (string.IsNullOrEmpty(buildingNumber) ? "" : "and (所属楼宇 like '%" + buildingNumber + "%') ") +
-                                (string.IsNullOrEmpty(name) ? "" : "and (占用者名称 like '%" + name + "%') ") +
-                                "GROUP BY 资源编号, 占用者名称, 帐套代码 " +
-                                "ORDER BY 占用者名称";
-            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString);
-            if (dt.Rows.Count == 0)
-            {
-                sr.status = "Fail";
-                sr.result = "未查询到任何记录";
-                sr.parameters = sqlString;
-                return sr;
-            }
-            List<Charged> chargedList = new List<Charged>();
-
-            foreach (DataRow row in dt.Rows)
-            {
-                Charged c = new Charged()
-                {
-                    RoomNumber = DataTypeHelper.GetStringValue(row["资源编号"]),
-                    Name = DataTypeHelper.GetStringValue(row["占用者名称"]),
-                    Total = DataTypeHelper.GetDoubleValue(row["已收总额"]),
-                    ZTCode = DataTypeHelper.GetStringValue(row["帐套代码"]),
-                };
-                chargedList.Add(c);
-            }
-            sr.status = "Success";
-            sr.result = "成功";
-            sr.data = chargedList.ToArray();
-            return sr;
-        }
+        
 
         public static StatusReport GetChargedDetail(string homeNumber, string name, string ztcode, string startMonth, string endMonth)
         {
@@ -208,6 +170,44 @@ namespace HexiServer.Business
             return sr;
         }
 
+        public static StatusReport GetChargeList(string homeNumber, string name, string ztcode, string buildingNumber)
+        {
+            StatusReport sr = new StatusReport();
+            string sqlString = "SELECT 资源编号, 占用者名称, SUM(应收金额) AS 已收总额, 帐套代码 " +
+                                "FROM 应收款APP " +
+                                "WHERE 帐套代码 = " + ztcode +
+                                " and 收费状态 is null " +
+                                (string.IsNullOrEmpty(homeNumber) ? "" : "and (资源编号 like '%" + homeNumber + "%') ") +
+                                (string.IsNullOrEmpty(buildingNumber) ? "" : "and (所属楼宇 like '%" + buildingNumber + "%') ") +
+                                (string.IsNullOrEmpty(name) ? "" : "and (占用者名称 like '%" + name + "%') ") +
+                                "GROUP BY 资源编号, 占用者名称, 帐套代码 " +
+                                "ORDER BY 占用者名称";
+            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString);
+            if (dt.Rows.Count == 0)
+            {
+                sr.status = "Fail";
+                sr.result = "未查询到任何记录";
+                sr.parameters = sqlString;
+                return sr;
+            }
+            List<Charged> chargedList = new List<Charged>();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                Charged c = new Charged()
+                {
+                    RoomNumber = DataTypeHelper.GetStringValue(row["资源编号"]),
+                    Name = DataTypeHelper.GetStringValue(row["占用者名称"]),
+                    Total = DataTypeHelper.GetDoubleValue(row["已收总额"]),
+                    ZTCode = DataTypeHelper.GetStringValue(row["帐套代码"]),
+                };
+                chargedList.Add(c);
+            }
+            sr.status = "Success";
+            sr.result = "成功";
+            sr.data = chargedList.ToArray();
+            return sr;
+        }
         public static StatusReport GetCharges(string ztCode, string roomNumber, string userName)
         {
 
@@ -224,7 +224,7 @@ namespace HexiServer.Business
 
             StatusReport sr = new StatusReport();
 
-            string sqlString = " select 应收款ID as ID,计费年月,费用名称,费用说明,应收金额,收费状态,帐套名称 " +
+            string sqlString = " select 应收款ID as ID,计费年月,费用名称,费用说明,应收金额,收费状态 " +
                                 " from 应收款APP" +
                                 " where 帐套代码 = @帐套代码 " +
                                 " and 房号 = @房号 " +
@@ -232,7 +232,7 @@ namespace HexiServer.Business
                                 " and 收费状态 IS NULL " +
                                 " order by 费用名称";
 
-            DataTable dt = SQLHelper.ExecuteQuery("wx", sqlString,
+            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString,
                 new SqlParameter("@占用者名称", userName),
                 new SqlParameter("@房号", roomNumber),
                 new SqlParameter("@帐套代码", ztCode));
@@ -320,7 +320,7 @@ namespace HexiServer.Business
         public static StatusReport SetCharges(string datetime, string name, string[] chargeIds, string paymentMethod)
         {
             StatusReport sr = new StatusReport();
-            string sqlString = "update weixin.dbo.应收款APP " +
+            string sqlString = "update 应收款APP " +
                                 "set 收费状态 = '已收费', " +
                                 " 收费日期 = @收费日期, " +
                                 " 付款方式 = @付款方式, " +
@@ -341,6 +341,34 @@ namespace HexiServer.Business
             return sr;
         }
 
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         /// <summary>
         /// 小程序_报表_考核_物业管理费绩效考核_全公司
         /// </summary>

@@ -20,6 +20,6 @@ namespace HexiServer.Models
         /// <summary>
         /// 巡更图片
         /// </summary>
-        public const string patrolImageMainPath = imageMainPath + "jczl_fwrwgl\\";//巡更图片
+        public const string patrolImageMainPath = imageMainPath + "jczl_bsgl\\";//巡更图片
     }
 }
