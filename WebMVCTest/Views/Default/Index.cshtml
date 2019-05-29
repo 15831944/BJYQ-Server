@@ -1,0 +1,25 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href = "~/Content/bootStrap.css" rel = "stylesheet" />
+    <link href = "~/Content/bootStrap-theme.css" rel = "stylesheet" />
+    <title>Index</title>
+</head>
+<body>
+    <div class="text-center">
+        @ViewBag.Greeting
+        @ViewBag.content
+    </div>
+    <div class="text-danger text-center">
+        Hello World (frome the view)
+        @Html.ActionLink("RSVP Now", "RsvpForm")
+    </div>
+</body>
+</html>

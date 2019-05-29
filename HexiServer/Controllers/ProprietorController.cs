@@ -17,9 +17,9 @@ namespace HexiServer.Controllers
             //{
             //    return Json(new { status = "Fail", result = "信息不完整" });
             //}
-            Proprietor[] proprietorList = ProprietorDal.GetProprietorList(ztCode, homeNumber, name, licensePlateNumber);
+            return Json(ProprietorDal.GetProprietorList(ztCode, homeNumber, name, licensePlateNumber));
 
-            return Json(proprietorList);
+            //return Json(proprietorList);
         }
     }
 }

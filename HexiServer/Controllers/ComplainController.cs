@@ -28,7 +28,7 @@ namespace HexiServer.Controllers
         }
 
         [HttpPost]
-        public ActionResult OnGetComplainList(string classify, string status)
+        public ActionResult OnGetComplainList(string classify, string status, string name)
         {
             StatusReport sr = new StatusReport();
             if (string.IsNullOrEmpty(classify) || string.IsNullOrEmpty(status))
@@ -39,7 +39,7 @@ namespace HexiServer.Controllers
             }
             else
             {
-                sr = ComplainDal.GetComplaintList(classify, status);
+                sr = ComplainDal.GetComplaintList(classify, status, name);
                 sr.parameters = Request.QueryString;
             }
             return Json(sr);

@@ -56,15 +56,15 @@ namespace HexiServer.Controllers
                     }
                     break;
                 case "投诉上报":
-                    if (level == "一线" || level == "助理" || level == "项目经理")
-                    {
-                        sr.status = "Fail";
-                        sr.result = "没有此权限";
-                    }
-                    else
-                    {
+                    //if (level == "一线" || level == "助理" || level == "项目经理")
+                    //{
+                    //    sr.status = "Fail";
+                    //    sr.result = "没有此权限";
+                    //}
+                    //else
+                    //{
                         sr = ComplainDal.GetComplainReport();
-                    }
+                    //}
                     break;
             }
 

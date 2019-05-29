@@ -13,11 +13,11 @@ namespace HexiServer.Business
     public class ProprietorDal
     {
 
-        public static Proprietor[] GetProprietorList(string ztCode, string homeNumber, string name, string licensePlateNumber)
+        public static StatusReport GetProprietorList(string ztCode, string homeNumber, string name, string licensePlateNumber)
         {
             string sqlString =
                 " SELECT ID, 房产单元编号, 占用者名称, 占用者身份, 联系电话, 联系地址, 紧急联系人, 紧急联系人电话," +
-                " 紧急联系人地址, 建筑面积, 当前欠款, 房号, 层数, 所属楼宇, 车牌号码,车辆颜色 " +
+                " 紧急联系人地址, 建筑面积, 当前欠款,所属楼宇,房产类型,户型, 车牌号码,车辆颜色,机动车型 " +
                 " FROM dbo.小程序_现场查询 " +
                 " WHERE(占用情况 = '正在占用') " +
                 " and (帐套代码 = @帐套代码) " +
@@ -29,15 +29,17 @@ namespace HexiServer.Business
                 new SqlParameter("@帐套代码", ztCode),
                 new SqlParameter("@资源表编号", homeNumber),
                 new SqlParameter("@占用者名称", name));
-
-            List<Proprietor> proprietorList = new List<Proprietor>();
+            if (dt.Rows.Count <= 0)
+            {
+                return new StatusReport().SetFail("未发现任何数据");
+            }
+            List<object> proprietorList = new List<object>();
             foreach (DataRow row in dt.Rows)
             {
-                Proprietor p = new Proprietor()
+                var p = new 
                 {
                     Id = DataTypeHelper.GetIntValue(row["ID"]),
                     RoomNumber = DataTypeHelper.GetStringValue(row["房产单元编号"]),
-                    //RoomAddress = SetRoomAddress(DataTypeHelper.GetStringValue(row["部门"]), DataTypeHelper.GetStringValue(row["所属楼宇"]), DataTypeHelper.GetIntValue(row["层数"]), DataTypeHelper.GetStringValue(row["房号"])),
                     Name = DataTypeHelper.GetStringValue(row["占用者名称"]),
                     Identity = DataTypeHelper.GetStringValue(row["占用者身份"]),
                     Phone = DataTypeHelper.GetStringValue(row["联系电话"]),
@@ -46,14 +48,22 @@ namespace HexiServer.Business
                     EmergencyPhone = DataTypeHelper.GetStringValue(row["紧急联系人电话"]),
                     EmergencyAddress = DataTypeHelper.GetStringValue(row["紧急联系人地址"]),
                     Area = DataTypeHelper.GetDoubleValue(row["建筑面积"]),
+                    Type = DataTypeHelper.GetStringValue(row["房产类型"]),
+                    Building = DataTypeHelper.GetStringValue(row["所属楼宇"]),
+                    HouseType = DataTypeHelper.GetStringValue(row["户型"]),
                     TotalArrearage = DataTypeHelper.GetDoubleValue(row["当前欠款"]),
                     LicensePlateNumber = DataTypeHelper.GetStringValue(row["车牌号码"]),
-                    CarColor = DataTypeHelper.GetStringValue(row["车辆颜色"])
+                    CarColor = DataTypeHelper.GetStringValue(row["车辆颜色"]),
+                    CarType = DataTypeHelper.GetStringValue(row["机动车型"])
                 };
 
                 proprietorList.Add(p);
             }
-            return proprietorList.ToArray();
+            StatusReport sr = new StatusReport();
+            sr.status = "Success";
+            sr.result = "Success";
+            sr.data = proprietorList.ToArray();
+            return sr;
         }
 
         private static string SetRoomAddress(string department,string building, int? floor, string roomNumber)

@@ -14,18 +14,44 @@ namespace HexiServer.Business
 {
     public class LookOverDal
     {
-
-        public static StatusReport GetLookOverInfo(string ztCode, string func, string period)
+        public static StatusReport GetLookOverRouteInfo(string ztCode, string func, string name)
         {
-            string condition = period == "day" ? 
-                " where (分类 = @分类 and 巡检业务 = @巡检业务 and convert(varchar(8),工作日期,112) = convert(varchar(8),getDate(),112) and 巡检周期 = '日') " :
-                " where (分类 = @分类 and 巡检业务 = @巡检业务 and datediff(day,工作日期 ,getDate()) < 7 and 巡检周期 = '周')";
+            string sqlString = "select distinct 巡检路线 from dbo.基础资料_巡检记录 where 分类 = @分类 and 巡检业务 = @巡检业务 and 巡检人 = @巡检人 and 工作日期 = @工作日期 ";
+            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, 
+                new SqlParameter("@分类", ztCode), 
+                new SqlParameter("@巡检业务", func),
+                new SqlParameter("@工作日期", DateTime.Now.Date),
+                new SqlParameter("@巡检人", name));
+            if (dt.Rows.Count == 0)
+            {
+                return new StatusReport().SetFail("尚未设置巡检路线或当日没有巡检工作");
+            }
+            List<string> routeList = new List<string>();
+            foreach(DataRow dr in dt.Rows)
+            {
+                routeList.Add(DataTypeHelper.GetStringValue(dr["巡检路线"]));
+            }
+            StatusReport sr = new StatusReport();
+            sr.status = "Success";
+            sr.result = "Success";
+            sr.data = routeList.ToArray();
+            return sr;
+        }
+
+        public static StatusReport GetLookOverInfo(string ztCode, string func, string route, string name)
+        {
+            
             string sqlString =
-                " SELECT ID, 巡检业务, 巡检对象, 巡检项目, 巡检周期, 巡检时间 " +
-                " FROM dbo.基础资料_巡检记录 " +
-                  condition +
-                " order by 巡检对象, 巡检项目, 巡检周期 ";
-            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@分类", ztCode), new SqlParameter("@巡检业务", func));
+                " SELECT ID, 巡检业务, 巡检点, 巡检项目, 巡检时间 " +
+                " FROM dbo.基础资料_巡检记录 where 分类 = @分类 and 巡检业务 = @巡检业务 and 巡检路线 = @巡检路线 and 巡检人 = @巡检人 and 工作日期 = @工作日期 ";
+                  //condition +
+                //" order by 巡检对象, 巡检项目, 巡检周期 ";
+            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, 
+                new SqlParameter("@分类", ztCode), 
+                new SqlParameter("@巡检业务", func), 
+                new SqlParameter("@巡检路线", route),
+                new SqlParameter("@工作日期", DateTime.Now.Date),
+                new SqlParameter("@巡检人", name));
             if (dt.Rows.Count == 0)
             {
                 return new StatusReport().SetFail();
@@ -36,9 +62,9 @@ namespace HexiServer.Business
                 LookOver lo = new LookOver();
                 lo.id = DataTypeHelper.GetStringValue(dr["ID"]);
                 lo.business = DataTypeHelper.GetStringValue(dr["巡检业务"]);
-                lo.objectName = DataTypeHelper.GetStringValue(dr["巡检对象"]);
+                lo.objectName = DataTypeHelper.GetStringValue(dr["巡检点"]);
                 lo.item = DataTypeHelper.GetStringValue(dr["巡检项目"]);
-                lo.period = DataTypeHelper.GetStringValue(dr["巡检周期"]);
+                //lo.period = DataTypeHelper.GetStringValue(dr["巡检周期"]);
                 string time = DataTypeHelper.GetDateStringValue(dr["巡检时间"]);
                 lo.isLook = string.IsNullOrEmpty(time) ?  false : true ;
                 loList.Add(lo);
@@ -46,29 +72,22 @@ namespace HexiServer.Business
             return new StatusReport(loList.ToArray());
         }
 
-        public static StatusReport SetLookOverResult(string userName, string isSpotCheck, string items)
+        public static StatusReport SetLookOverResult(string isSpotCheck, string items)
         {
-            using (StreamWriter sw = new StreamWriter("D:\\1_importTemp\\TestFile1.txt"))
-            {
-                sw.WriteLine(items);
-                sw.WriteLine(JsonConvert.SerializeObject(items));
-            }
             StatusReport sr = new StatusReport();
-            string sqlString = " update 基础资料_巡检记录 set 巡检人 = @巡检人, 巡检时间 = @巡检时间, " +
-                " 是否合格 = @是否合格, 是否抽检 = @是否抽检, 不合格说明 = @不合格说明 " +
+            string sqlString = " update 基础资料_巡检记录 set 巡检时间 = @巡检时间, " +
+                " 是否合格 = @是否合格, 不合格说明 = @不合格说明, 状态 = @状态 " +
                 " where ID = @ID ";
             JArray itemArray = (JArray)JsonConvert.DeserializeObject(items);
             for (int i = 0; i < itemArray.Count; i++)
             {
                 JObject item = (JObject)itemArray[i];
                 sr = SQLHelper.Update("wyt", sqlString,
-                    new SqlParameter("@巡检人", userName),
                     new SqlParameter("@巡检时间", DateTime.Now),
+                    new SqlParameter("@状态", "已巡检"),
                     new SqlParameter("@是否合格", Convert.ToBoolean(item["isNormal"]) ? "是" : "否"),
-                    new SqlParameter("@是否抽检", isSpotCheck),
                     new SqlParameter("@不合格说明", DataTypeHelper.GetDBValue(item["explain"].ToString())),
                     new SqlParameter("@ID", DataTypeHelper.GetDBValue(item["id"].ToString())));
-
             }
             return sr;
         }

@@ -35,7 +35,7 @@ namespace HexiServer.Business
             }
             string sqlstring = " SELECT ID, 分类, 设备运行编号, 设备编号, 设备型号, 设备名称, 系统名称, 出厂日期, " +
                                " 使用日期, 设备价格, 出厂序号, 设计寿命, 卡号, 安装地点, 产地, 设备保养管理代号, 设备保养管理内容, " +
-                               " 设备保养管理日期, 工作名称, 工作日期, 是否完成, 录入日期, 录入人, 完成说明, 序次, 保养前照片, 保养后照片, " +
+                               " 设备保养管理日期, 工作名称, 工作日期, 是否完成, 录入日期, 录入人, 完成说明, 序次, 保养前照片, 保养中照片, 保养后照片, " +
                                " 宽限上延天数,宽限下延天数 " +
                                " FROM dbo.小程序_设备管理 ";
             sqlstring += done;
@@ -76,7 +76,7 @@ namespace HexiServer.Business
                 equipment.InputMan = DataTypeHelper.GetStringValue(dr["录入人"]);
                 equipment.DoneInfo = DataTypeHelper.GetStringValue(dr["完成说明"]);
                 equipment.BeforeImage = DataTypeHelper.GetStringValue(dr["保养前照片"]);
-                //equipment.MiddleImage = DataTypeHelper.GetStringValue(dr["保养中照片"]);
+                equipment.MiddleImage = DataTypeHelper.GetStringValue(dr["保养中照片"]);
                 equipment.AfterImage = DataTypeHelper.GetStringValue(dr["保养后照片"]);
                 equipment.Order = DataTypeHelper.GetBooleanValue(dr["序次"]) == true ? "1" : "0";
                 equipment.BeforeDays = DataTypeHelper.GetIntValue(dr["宽限上延天数"]);
@@ -114,21 +114,19 @@ namespace HexiServer.Business
             string sqlstring = "";
             if (func == "before")
             {
-                sqlstring = "update dbo.小程序_设备管理 set 保养前照片 = @保养前照片 where ID = @ID";
+                sqlstring = "update dbo.小程序_设备管理 set 保养前照片 = @保养照片 where ID = @ID";
             }
             else if (func == "after")
             {
-                sqlstring = "update dbo.小程序_设备管理 set 保养后照片 = @保养后照片 where ID = @ID";
+                sqlstring = "update dbo.小程序_设备管理 set 保养后照片 = @保养照片 where ID = @ID";
             }
-            //else
-            //{
-            //    sqlstring = "update dbo.小程序_设备管理 set 保养中照片 = @保养中照片 where ID = @ID";
-            //}
+            else
+            {
+                sqlstring = "update dbo.小程序_设备管理 set 保养中照片 = @保养照片 where ID = @ID";
+            }
 
             sr = SQLHelper.Update("wyt", sqlstring,
-                new SqlParameter("@保养前照片", imagePath),
-                new SqlParameter("@保养后照片", imagePath),
-                //new SqlParameter("@保养中照片", imagePath),
+                new SqlParameter("@保养照片", imagePath),
                 new SqlParameter("@ID", id));
             return sr;
         }
@@ -136,7 +134,7 @@ namespace HexiServer.Business
         public static StatusReport SearchEquipment(string operationNumber)
         {
             StatusReport sr = new StatusReport();
-            string sqlstring = "SELECT ID, 系统名称, 设备运行编号, 卡号, 设备名称, 设备型号, 设备编号, 安装地点," +
+            string sqlstring = "SELECT ID, 系统名称, 卡号, 设备名称, 设备型号, 设备编号, 安装地点," +
                                 " 产地, 出厂日期, 使用日期, 设备价格, 出厂序号, 设计寿命, 预计残值, 使用年限 " +
                                  "FROM 小程序_设备管理 WHERE 设备编号 = @设备编号";
             DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlstring, new SqlParameter("@设备编号", operationNumber));
@@ -148,7 +146,7 @@ namespace HexiServer.Business
             }
             DataRow dr = dt.Rows[0];
             Equipment equipment = new Equipment();
-            equipment.OperationNumber = DataTypeHelper.GetStringValue(dr["设备运行编号"]);
+            //equipment.OperationNumber = DataTypeHelper.GetStringValue(dr["设备运行编号"]);
             equipment.Number = DataTypeHelper.GetStringValue(dr["设备编号"]);
             equipment.Name = DataTypeHelper.GetStringValue(dr["设备名称"]);
             equipment.SystemName = DataTypeHelper.GetStringValue(dr["系统名称"]);
@@ -229,58 +227,65 @@ namespace HexiServer.Business
             return sr;
         }
 
-        public static StatusReport GetEquipmentTrouble(string classify, string isDone)
+        public static StatusReport GetEquipmentTrouble(string classify, string isDone, string name)
         {
             StatusReport sr = new StatusReport();
             string done = "";
             if (isDone == "0")
             {
-                done = " where (left(分类,2) = @分类) AND 完成时间 is null ORDER BY ID DESC ";
+                done = " where (分类 = @分类) AND 状态 = @状态 and 维修人 = @维修人 ORDER BY ID DESC ";
             }
             else
             {
-                done = " where  (left(分类,2) = @分类)  AND  完成时间 is not null ORDER BY ID DESC ";
+                done = " where  (分类 = @分类)  AND 状态 = @状态 and 维修人 = @维修人 ORDER BY ID DESC ";
             }
-            string sqlstring = " SELECT ID, 设备名称, 分类, 设备编号, 发生时间, 故障描述, 状态, 维修人, 维修时限, 接单时间, " +
-                " 维修说明, 完成时间, 维修前照片1, 维修前照片2, 维修前照片3, 处理后照片1, 处理后照片2, 处理后照片3 " +
-                " FROM dbo.基础资料_设备故障管理 ";
+            string sqlstring = " SELECT * FROM dbo.基础资料_设备故障管理 ";
             sqlstring += done;
 
             DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlstring,
-                new SqlParameter("@分类", classify));
+                new SqlParameter("@分类", DataTypeHelper.GetDBValue(classify)),
+                new SqlParameter("@状态", isDone == "0" ? "已派单" : "已完成"),
+                new SqlParameter("@维修人", DataTypeHelper.GetDBValue(name)));
             if (dt.Rows.Count == 0)
             {
-                sr.status = "Fail";
-                sr.result = "未查询到任何数据";
-                sr.parameters = sqlstring;
-                return sr;
+                return sr.SetFail("未查询到任何数据");
             }
-            List<EquipmentTrouble> equipmentList = new List<EquipmentTrouble>();
+            List<object> equipmentList = new List<object>();
             foreach (DataRow dr in dt.Rows)
             {
-                EquipmentTrouble equipment = new EquipmentTrouble();
                 List<string> beforeList = new List<string>();
                 List<string> afterList = new List<string>();
-                equipment.id = DataTypeHelper.GetIntValue(dr["ID"]);
-                equipment.classify = DataTypeHelper.GetStringValue(dr["分类"]);
-                equipment.name = DataTypeHelper.GetStringValue(dr["设备名称"]);
-                equipment.number = DataTypeHelper.GetStringValue(dr["设备编号"]);
-                equipment.brokenTime = DataTypeHelper.GetDateStringValue(dr["发生时间"]);
-                equipment.brokenInfo = DataTypeHelper.GetStringValue(dr["故障描述"]);
-                equipment.status = DataTypeHelper.GetStringValue(dr["状态"]);
-                equipment.repairMan = DataTypeHelper.GetStringValue(dr["维修人"]);
-                equipment.repairTimeLimit = DataTypeHelper.GetStringValue(dr["维修时限"]);
-                equipment.receiveTime = DataTypeHelper.GetDateStringValue(dr["接单时间"]);
-                equipment.repairInfo = DataTypeHelper.GetStringValue(dr["维修说明"]);
-                equipment.finishTime = DataTypeHelper.GetDateStringValue(dr["完成时间"]);
-                beforeList.Add(DataTypeHelper.GetStringValue(dr["维修前照片1"]));
-                beforeList.Add(DataTypeHelper.GetStringValue(dr["维修前照片2"]));
-                beforeList.Add(DataTypeHelper.GetStringValue(dr["维修前照片3"]));
-                equipment.beforeImage = beforeList.ToArray();
-                afterList.Add(DataTypeHelper.GetStringValue(dr["处理后照片1"]));
-                afterList.Add(DataTypeHelper.GetStringValue(dr["处理后照片2"]));
-                afterList.Add(DataTypeHelper.GetStringValue(dr["处理后照片3"]));
-                equipment.afterImage = afterList.ToArray();
+                for (int i = 1; i <=3; i++)
+                {
+                    string beforeImage = DataTypeHelper.GetStringValue(dr["维修前照片" + i.ToString()]);
+                    string afterImage = DataTypeHelper.GetStringValue(dr["处理后照片" + i.ToString()]);
+                    beforeImage = beforeImage.Split('|')[beforeImage.Split('|').Length - 1];
+                    afterImage = afterImage.Split('|')[afterImage.Split('|').Length - 1];
+                    beforeList.Add(beforeImage);
+                    afterList.Add(afterImage);
+                }
+                var equipment = new
+                {
+                    id = DataTypeHelper.GetIntValue(dr["ID"]),
+                    classify = DataTypeHelper.GetStringValue(dr["分类"]),
+                    project = DataTypeHelper.GetStringValue(dr["管理处"]),
+                    registrant = DataTypeHelper.GetStringValue(dr["登记人"]),
+                    registerTime = DataTypeHelper.GetDateStringValue(dr["登记时间"]),
+                    name = DataTypeHelper.GetStringValue(dr["设备名称"]),
+                    number = DataTypeHelper.GetStringValue(dr["设备编号"]),
+                    useAddress = DataTypeHelper.GetStringValue(dr["安装地点"]),
+                    brokenTime = DataTypeHelper.GetDateStringValue(dr["发生时间"]),
+                    brokenInfo = DataTypeHelper.GetStringValue(dr["故障描述"]),
+                    status = DataTypeHelper.GetStringValue(dr["状态"]),
+                    repairMan = DataTypeHelper.GetStringValue(dr["维修人"]),
+                    repairTimeLimit = DataTypeHelper.GetStringValue(dr["维修时限"]),
+                    receiveTime = DataTypeHelper.GetDateStringValue(dr["派工时间"]),
+                    repairInfo = DataTypeHelper.GetStringValue(dr["维修说明"]),
+                    finishTime = DataTypeHelper.GetDateStringValue(dr["完成时间"]),
+                    fee = DataTypeHelper.GetDecimalValue(dr["费用"]),
+                    beforeImage = beforeList.ToArray(),
+                    afterImage = afterList.ToArray(),
+                };
                 equipmentList.Add(equipment);
             }
             sr.status = "Success";
@@ -312,7 +317,7 @@ namespace HexiServer.Business
         {
             StatusReport sr = new StatusReport();
             string itemName = func == "before" ? "维修前照片" + index.ToString() : "处理后照片" + index.ToString();
-            string sqlString = " update 基础资料_设备故障记录 set " + itemName + " = @路径 " +
+            string sqlString = " update 基础资料_设备故障管理 set " + itemName + " = @路径 " +
                                " where ID = @ID ";
             sr = SQLHelper.Update("wyt", sqlString,
                 new SqlParameter("@路径", sqlImagePath),
@@ -592,7 +597,7 @@ namespace HexiServer.Business
             " SELECT " +
             " dbo.资源帐套表.帐套代码, " +
             " dbo.资源帐套表.帐套名称, " +
-            " COUNT(CASE WHEN DATEDIFF(hh, 接单时间, ISNULL(完成时间, '1990/1/1')) > CONVERT(int, LEFT(维修时限, LEN(维修时限) - 2)) THEN 1 ELSE NULL END) AS 未按时完成数 " +
+            " COUNT(CASE WHEN DATEDIFF(hh, 派工时间, ISNULL(完成时间, '1990/1/1')) > CONVERT(int, LEFT(维修时限, LEN(维修时限) - 2)) THEN 1 ELSE NULL END) AS 未按时完成数 " +
             " FROM dbo.基础资料_设备故障管理 " +
             " LEFT OUTER JOIN dbo.资源帐套表 ON LEFT(dbo.基础资料_设备故障管理.分类, 2) = dbo.资源帐套表.帐套代码 " +
             " GROUP BY dbo.资源帐套表.帐套代码, dbo.资源帐套表.帐套名称 ";
@@ -623,9 +628,9 @@ namespace HexiServer.Business
             StatusReport sr = new StatusReport();
             string done = " where (left(分类,2) = @分类) " +
                 " AND (完成时间 is not null) " +
-                " AND ( DATEDIFF(hh, 接单时间, ISNULL(完成时间, '1990/1/1')) > CONVERT(int, LEFT(维修时限, LEN(维修时限) - 2))) " +
+                " AND ( DATEDIFF(hh, 派工时间, ISNULL(完成时间, '1990/1/1')) > CONVERT(int, LEFT(维修时限, LEN(维修时限) - 2))) " +
                 " ORDER BY ID DESC ";
-            string sqlstring = " SELECT ID, 设备名称, 分类, 设备编号, 发生时间, 故障描述, 状态, 维修人, 维修时限, 接单时间, " +
+            string sqlstring = " SELECT ID, 设备名称, 分类, 设备编号, 发生时间, 故障描述, 状态, 维修人, 维修时限, 派工时间, " +
                 " 维修说明, 完成时间, 维修前照片1, 维修前照片2, 维修前照片3, 处理后照片1, 处理后照片2, 处理后照片3 " +
                 " FROM dbo.基础资料_设备故障管理 ";
             sqlstring += done;
@@ -654,7 +659,7 @@ namespace HexiServer.Business
                 equipment.status = DataTypeHelper.GetStringValue(dr["状态"]);
                 equipment.repairMan = DataTypeHelper.GetStringValue(dr["维修人"]);
                 equipment.repairTimeLimit = DataTypeHelper.GetStringValue(dr["维修时限"]);
-                equipment.receiveTime = DataTypeHelper.GetDateStringValue(dr["接单时间"]);
+                equipment.receiveTime = DataTypeHelper.GetDateStringValue(dr["派工时间"]);
                 equipment.repairInfo = DataTypeHelper.GetStringValue(dr["维修说明"]);
                 equipment.finishTime = DataTypeHelper.GetDateStringValue(dr["完成时间"]);
                 beforeList.Add(DataTypeHelper.GetStringValue(dr["维修前照片1"]));

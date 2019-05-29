@@ -43,7 +43,7 @@ namespace HexiServer.Controllers
                 sr.result = "信息不完整";
                 return Json(sr);
             }
-            sr = RepairDal.GetPatrol(name, classify);
+            sr = PatrolDal.GetPatrol(name, classify);
 
             return Json(sr);
         }

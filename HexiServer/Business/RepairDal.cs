@@ -29,7 +29,7 @@ namespace HexiServer.Business
                 " 目录显示,回访时间,回访意见,回访人,到场时间,状态,是否阅读,报修前照片1,报修前照片2,报修前照片3, " +
                 " 处理后照片1,处理后照片2,处理后照片3,报修来源,报修处理时间,报修处理ID,网上报修时间,服务类别,紧急程度, " +
                 " 报修说明,谈好上门时间,帐套代码,帐套名称 " +
-            " FROM 小程序_工单管理 where 帐套代码 = @帐套代码 ";
+            " FROM 小程序_工单管理 where 帐套代码 = @帐套代码 and year(报修时间) > 2017 and 接单人 = @接单人 ";
             //" FROM 小程序_工单管理 where 接单人 = @接单人 and 帐套代码 = @帐套代码 ";
             sqlString += orderStatusCondition;
             sqlString += (" order by " + orderType + " desc");
@@ -210,95 +210,7 @@ namespace HexiServer.Business
             return sr;
         }
 
-        /// <summary>
-        /// 获取报事信息
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="classify"></param>
-        /// <returns></returns>
-        public static StatusReport GetPatrol (string name, string classify)
-        {
-            StatusReport sr = new StatusReport();
-            string sqlString =
-                " select top 10 " +
-                " ID,序号,部门,地址,报修人,联系电话,服务项目,服务类别," +
-                " 紧急程度,报修说明,报修时间,预约服务时间,谈好上门时间,发单人,接单人,派工时间," +
-                " 到场时间,操作人,完成时间,收费类别,材料费,人工费,是否已收,是否阅读,状态,完成情况及所耗物料,报修前照片1," +
-                " 报修前照片2,报修前照片3,处理后照片1,处理后照片2,处理后照片3,延期原因,预计延期到,回访人,回访意见,回访时间, " +
-                " 是否满意,业主确认完成,业主确认完成时间,是否满意,业主评价 " +
-                " from 小程序_工单管理 " +
-                " where 报修人 = @报修人 and left(分类,2) = @分类 and 报修来源 = @报修来源 " +
-                " order by ID desc ";
-            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString,
-                new SqlParameter("@报修人", name),
-                new SqlParameter("@分类", classify),
-                new SqlParameter("@报修来源", "小程序报事"));
-
-            if (dt.Rows.Count == 0)
-            {
-                sr.status = "Fail";
-                sr.result = "未查询到任何数据";
-                return sr;
-            }
-
-            List<Repair> repairList = new List<Repair>();
-            foreach (DataRow row in dt.Rows)
-            {
-                List<string> beforeList = new List<string>();
-                List<string> afterList = new List<string>();
-                Repair r = new Repair();
-                r.Id = DataTypeHelper.GetIntValue(row["ID"]);
-                r.SerialNumber = DataTypeHelper.GetStringValue(row["序号"]);
-                r.Department = DataTypeHelper.GetStringValue(row["部门"]);
-                r.Address = DataTypeHelper.GetStringValue(row["地址"]);
-                r.RepairPerson = DataTypeHelper.GetStringValue(row["报修人"]);
-                r.PhoneNumber = DataTypeHelper.GetStringValue(row["联系电话"]);
-                r.ServiceProject = DataTypeHelper.GetStringValue(row["服务项目"]);
-                r.ServiceCategory = DataTypeHelper.GetStringValue(row["服务类别"]);
-                r.Level = DataTypeHelper.GetStringValue(row["紧急程度"]);
-                r.RepairExplain = DataTypeHelper.GetStringValue(row["报修说明"]);
-                r.RepairTime = DataTypeHelper.GetDateStringValue(row["报修时间"]);
-                r.OrderTime = DataTypeHelper.GetDateStringValue(row["预约服务时间"]);
-                r.VisitTime = DataTypeHelper.GetDateStringValue(row["谈好上门时间"]);
-                r.SendPerson = DataTypeHelper.GetStringValue(row["发单人"]);
-                r.ReceivePerson = DataTypeHelper.GetStringValue(row["接单人"]);
-                r.DispatchTime = DataTypeHelper.GetDateStringValue(row["派工时间"]);
-                r.ArriveTime = DataTypeHelper.GetDateStringValue(row["到场时间"]);
-                r.OperatePerson = DataTypeHelper.GetStringValue(row["操作人"]);
-                r.CompleteTime = DataTypeHelper.GetDateStringValue(row["完成时间"]);
-                r.ChargeType = DataTypeHelper.GetStringValue(row["收费类别"]);
-                r.MaterialExpense = DataTypeHelper.GetDoubleValue(row["材料费"]);
-                r.LaborExpense = DataTypeHelper.GetDoubleValue(row["人工费"]);
-                //r.IsPaid = DataTypeHelper.GetStringValue(row["是否已收"]);
-                r.IsRead = DataTypeHelper.GetIntValue(row["是否阅读"]);
-                //r.AffirmComplete = DataTypeHelper.GetStringValue(row["业主确认完成"]);
-                //r.AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(row["是否满意"]);
-                //r.AffirmCompleteTime = DataTypeHelper.GetDateStringValue(row["业主确认完成时间"]);
-                //r.IsSatisfying = DataTypeHelper.GetStringValue(row["是否满意"]);
-                r.CallBackEvaluation = DataTypeHelper.GetStringValue(row["回访意见"]);
-                r.CallBackPerson = DataTypeHelper.GetStringValue(row["回访人"]);
-                r.CallBackTime = DataTypeHelper.GetDateStringValue(row["回访时间"]);
-                r.status = DataTypeHelper.GetStringValue(row["状态"]);
-                //r.status = string.IsNullOrEmpty(r.AffirmComplete) ? r.status : "业主已确认";
-                r.status = string.IsNullOrEmpty(r.CallBackPerson) ? r.status : "已回访";
-                r.CompleteStatus = DataTypeHelper.GetStringValue(row["完成情况及所耗物料"]);
-                //r.LateTime = DataTypeHelper.GetDateStringValue(row["预计延期到"]);
-                //r.LateReason = DataTypeHelper.GetStringValue(row["延期原因"]);
-                beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片1"]));
-                beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片2"]));
-                beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片3"]));
-                r.BeforeImage = beforeList.ToArray();
-                afterList.Add(DataTypeHelper.GetStringValue(row["处理后照片1"]));
-                afterList.Add(DataTypeHelper.GetStringValue(row["处理后照片2"]));
-                afterList.Add(DataTypeHelper.GetStringValue(row["处理后照片3"]));
-                r.AfterImage = afterList.ToArray();
-                repairList.Add(r);
-            }
-            sr.status = "Success";
-            sr.result = "成功";
-            sr.data = repairList.ToArray();
-            return sr;
-        }
+       
 
         /// <summary>
         /// 设置工单上传的照片
@@ -575,7 +487,7 @@ namespace HexiServer.Business
             StatusReport sr = new StatusReport();
 
             string sqlString = "";
-            string condition = "";
+            //string condition = "";
             if (level == "助理")
             {
                 DataTable dt = null;
@@ -586,22 +498,23 @@ namespace HexiServer.Business
                 " select " +
                 " ID,序号,部门,地址,报修人,联系电话,服务项目,服务类别," +
                 " 紧急程度,报修说明,报修时间,预约服务时间,谈好上门时间,发单人,接单人,派工时间," +
-                " 到场时间,操作人,完成时间,收费类别,材料费,人工费,是否已收,是否阅读,状态,完成情况及所耗物料,报修前照片1," +
-                " 报修前照片2,报修前照片3,处理后照片1,处理后照片2,处理后照片3,延期原因,预计延期到,回访人,回访意见,回访时间, " +
-                " 是否满意,业主确认完成,业主确认完成时间,是否满意,业主评价,是否入户, " +
+                " 到场时间,操作人,完成时间,收费类别,材料费,人工费,是否阅读,状态,完成情况及所耗物料,报修前照片1," +
+                " 报修前照片2,报修前照片3,处理后照片1,处理后照片2,处理后照片3," +
+                //" 延期原因,预计延期到,回访人,回访意见,回访时间, " +
+                //" 是否满意,业主确认完成,业主确认完成时间,是否满意,业主评价,是否入户,是否已收, " +
                 " case " +
                 " when isnull(完成时间,'') = '' and left(CONVERT(varchar(10),getdate(),112),8) = left(CONVERT(varchar(10),报修时间,112),8)  and cast(left(CONVERT(varchar(20),getdate(),114),2) as int) >= 17 then '当日未完成' " +
-                " when  ((预估完成时间 is not null and isnull(完成时间,'') = '' and DATEDIFF (hour, 预估完成时间, getdate()) >= 0) or (预估完成时间 is not null  and DATEDIFF (hour, 预估完成时间, 完成时间) > 0 and DATEDIFF (hour, 预估完成时间, getdate()) >= 0)) then '超过预估完成时间' " +
+                //" when  ((预估完成时间 is not null and isnull(完成时间,'') = '' and DATEDIFF (hour, 预估完成时间, getdate()) >= 0) or (预估完成时间 is not null  and DATEDIFF (hour, 预估完成时间, 完成时间) > 0 and DATEDIFF (hour, 预估完成时间, getdate()) >= 0)) then '超过预估完成时间' " +
                 " end " +
                 " as 上报原因 " +
-                " from 小程序_工单管理 where ((isnull(完成时间,'') = '' " +
+                " from 小程序_工单管理 where (isnull(完成时间,'') = '' " +
                 " and left(CONVERT(varchar(10),getdate(),112),8) = left(CONVERT(varchar(10),报修时间,112),8) " +
                 " and cast(left(CONVERT(varchar(20),getdate(),114),2) as int) >= 17 ) " +
-                " or (((预估完成时间 is not null and isnull(完成时间,'') = '' " +
-                " and DATEDIFF (hour, 预估完成时间, getdate()) >= 0) " +
-                " or (预估完成时间 is not null " +
-                " and DATEDIFF (hour, 预估完成时间, 完成时间) > 0 " +
-                " and DATEDIFF (hour, 预估完成时间, getdate()) >= 0)))) " +
+                //" or (((预估完成时间 is not null and isnull(完成时间,'') = '' " +
+                //" and DATEDIFF (hour, 预估完成时间, getdate()) >= 0) " +
+                //" or (预估完成时间 is not null " +
+                //" and DATEDIFF (hour, 预估完成时间, 完成时间) > 0 " +
+                //" and DATEDIFF (hour, 预估完成时间, getdate()) >= 0)))) " +
                 " and 帐套代码 = @帐套代码";
                 dt = SQLHelper.ExecuteQuery("wyt", sqlString,
                 new SqlParameter("@帐套代码", ztcode));
@@ -623,12 +536,22 @@ namespace HexiServer.Business
                 " select " +
                 " ID,序号,部门,地址,报修人,联系电话,服务项目,服务类别," +
                 " 紧急程度,报修说明,报修时间,预约服务时间,谈好上门时间,发单人,接单人,派工时间," +
-                " 到场时间,操作人,完成时间,收费类别,材料费,人工费,是否已收,是否阅读,状态,完成情况及所耗物料,报修前照片1," +
-                " 报修前照片2,报修前照片3,处理后照片1,处理后照片2,处理后照片3,延期原因,预计延期到,回访人,回访意见,回访时间, " +
-                " 是否满意,业主确认完成,业主确认完成时间,是否满意,业主评价,是否入户, " +
-                " case when 是否满意 = '不满意' then '业主确认不满意' end as 上报原因 " +
-                " from 小程序_工单管理 " +
-                " where 是否满意 = '不满意' " +
+                " 到场时间,操作人,完成时间,收费类别,材料费,人工费,是否阅读,状态,完成情况及所耗物料,报修前照片1," +
+                " 报修前照片2,报修前照片3,处理后照片1,处理后照片2,处理后照片3, " +
+                //"延期原因,预计延期到,回访人,回访意见,回访时间, " +
+                //" 是否满意,业主确认完成,业主确认完成时间,是否满意,业主评价,是否入户,是否已收, " +
+                //" case when 是否满意 = '不满意' then '业主确认不满意' end as 上报原因 " +
+                //" from 小程序_工单管理 " +
+                //" where 是否满意 = '不满意' " +
+                //" and 帐套代码 = @帐套代码";
+                 " case " +
+                " when isnull(完成时间,'') = '' and left(CONVERT(varchar(10),getdate(),112),8) = left(CONVERT(varchar(10),报修时间,112),8)  and cast(left(CONVERT(varchar(20),getdate(),114),2) as int) >= 17 then '当日未完成' " +
+                //" when  ((预估完成时间 is not null and isnull(完成时间,'') = '' and DATEDIFF (hour, 预估完成时间, getdate()) >= 0) or (预估完成时间 is not null  and DATEDIFF (hour, 预估完成时间, 完成时间) > 0 and DATEDIFF (hour, 预估完成时间, getdate()) >= 0)) then '超过预估完成时间' " +
+                " end " +
+                " as 上报原因 " +
+                 " from 小程序_工单管理 where (isnull(完成时间,'') = '' " +
+                " and left(CONVERT(varchar(10),getdate(),112),8) = left(CONVERT(varchar(10),报修时间,112),8) " +
+                " and cast(left(CONVERT(varchar(20),getdate(),114),2) as int) >= 17 ) " +
                 " and 帐套代码 = @帐套代码";
                 DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString,
                                 new SqlParameter("@帐套代码", ztcode));
@@ -646,89 +569,7 @@ namespace HexiServer.Business
             }
         }
 
-        //public static StatusReport GetRepairReport1(string ztcode, string level)
-        //{
-        //    StatusReport sr = new StatusReport();
-        //    string sqlStr =
-        //        " select " +
-        //        " ID,序号,部门,地址,报修人,联系电话,服务项目,服务类别," +
-        //        " 紧急程度,报修说明,报修时间,预约服务时间,谈好上门时间,发单人,接单人,派工时间," +
-        //        " 到场时间,操作人,完成时间,收费类别,材料费,人工费,是否已收,是否阅读,状态,完成情况及所耗物料,报修前照片1," +
-        //        " 报修前照片2,报修前照片3,处理后照片1,处理后照片2,处理后照片3,延期原因,预计延期到,回访人,回访意见,回访时间, " +
-        //        " 是否满意,业主确认完成,业主确认完成时间,是否满意,业主评价,是否入户 " +
-        //        " from 小程序_工单管理 ";
-        //    string sqlString = "";
-        //    string condition = "";
-        //    if (level == "助理")
-        //    {
-        //        DataTable dt = null;
-        //        List<Repair> repairList = null;
-        //        List<RepairReportProject> rrpList = new List<RepairReportProject>();
-        //        RepairReportProject rrp = null;
-        //        condition = " where 帐套代码 = @帐套代码 and isnull(完成时间,'') = '' " +
-        //            " and left(CONVERT(varchar(10),getdate(),112),8) = left(CONVERT(varchar(10),报修时间,112),8) " +
-        //            " and cast(left(CONVERT(varchar(20),getdate(),114),2) as int) >= 17 ";//当日未完工
-        //        sqlString = sqlStr + condition;
-        //        dt = SQLHelper.ExecuteQuery("wyt", sqlString,
-        //        new SqlParameter("@帐套代码", ztcode));
-
-        //        rrp = new RepairReportProject();
-        //        rrp.type = "当日未完成";
-        //        if (dt.Rows.Count != 0)
-        //        {
-        //            rrp = new RepairReportProject();
-        //            rrp.type = "当日未完成";
-        //            repairList = GetRepair(dt);
-        //            rrp.repairs = repairList.ToArray();
-                   
-        //        }
-        //        rrpList.Add(rrp);
-
-        //        condition = " where " +
-        //            "  帐套代码 = @帐套代码 and ((预估完成时间 is not null " +
-        //            " and isnull(完成时间,'') = '' " +
-        //            " and DATEDIFF (hour, 预估完成时间, getdate()) >= 0) " +
-        //            " or (预估完成时间 is not null " +
-        //            " and DATEDIFF (hour, 预估完成时间, 完成时间) > 0" +
-        //            " and DATEDIFF (hour, 预估完成时间, getdate()) >= 0)) ";//超过预估完成时间
-        //        sqlString = sqlStr + condition;
-        //        dt = SQLHelper.ExecuteQuery("wyt", sqlString,
-        //        new SqlParameter("@帐套代码", ztcode));
-        //        rrp = new RepairReportProject();
-        //        rrp.type = "超过预估完成时间";
-        //        if (dt.Rows.Count != 0)
-        //        {
-        //            repairList = GetRepair(dt);
-        //            rrp.repairs = repairList.ToArray();
-        //        }
-        //        rrpList.Add(rrp);
-        //        sr.status = "success";
-        //        sr.result = "成功";
-        //        sr.data = rrpList.ToArray();
-        //        return sr;
-        //    }
-        //    else
-        //    {
-        //        condition = " where  帐套代码 = @帐套代码 and  是否满意 = '不满意' ";
-        //        RepairReportCompany rrc = new RepairReportCompany();
-        //        rrc.type = "业主不满意";
-        //        sqlString = sqlStr + condition;
-        //        DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString,
-        //                        new SqlParameter("@帐套代码", ztcode));
-        //        if (dt.Rows.Count == 0)
-        //        {
-        //            sr.status = "Fail";
-        //            sr.result = "未查询到任何数据";
-        //            return sr;
-        //        }
-        //        List<Repair> repairList = GetRepair(dt);
-        //        rrc.repairs = repairList.ToArray();
-        //        sr.status = "Success";
-        //        sr.result = "成功";
-        //        sr.data = rrc;
-        //        return sr;
-        //    }
-        //}
+        
 
         private static List<RepairReport> GetRepairReport(DataTable dt)
         {
@@ -748,7 +589,7 @@ namespace HexiServer.Business
                 r.ServiceCategory = DataTypeHelper.GetStringValue(row["服务类别"]);
                 r.Level = DataTypeHelper.GetStringValue(row["紧急程度"]);
                 //r.Identity = DataTypeHelper.GetStringValue(row["身份"]);
-                r.NeedIn = DataTypeHelper.GetStringValue(row["是否入户"]);
+                //r.NeedIn = DataTypeHelper.GetStringValue(row["是否入户"]);
                 r.RepairExplain = DataTypeHelper.GetStringValue(row["报修说明"]);
                 r.RepairTime = DataTypeHelper.GetDateStringValue(row["报修时间"]);
                 r.OrderTime = DataTypeHelper.GetDateStringValue(row["预约服务时间"]);
@@ -763,17 +604,17 @@ namespace HexiServer.Business
                 r.MaterialExpense = DataTypeHelper.GetDoubleValue(row["材料费"]);
                 r.LaborExpense = DataTypeHelper.GetDoubleValue(row["人工费"]);
                 //r.IsPaid = DataTypeHelper.GetStringValue(row["是否已收"]);
-                r.IsRead = DataTypeHelper.GetIntValue(row["是否阅读"]);
+                //r.IsRead = DataTypeHelper.GetIntValue(row["是否阅读"]);
                 //r.AffirmComplete = DataTypeHelper.GetStringValue(row["业主确认完成"]);
                 //r.AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(row["业主评价"]);
                 //r.AffirmCompleteTime = DataTypeHelper.GetDateStringValue(row["业主确认完成时间"]);
                 //r.IsSatisfying = DataTypeHelper.GetStringValue(row["是否满意"]);
-                r.CallBackEvaluation = DataTypeHelper.GetStringValue(row["回访意见"]);
-                r.CallBackPerson = DataTypeHelper.GetStringValue(row["回访人"]);
-                r.CallBackTime = DataTypeHelper.GetDateStringValue(row["回访时间"]);
+                //r.CallBackEvaluation = DataTypeHelper.GetStringValue(row["回访意见"]);
+                //r.CallBackPerson = DataTypeHelper.GetStringValue(row["回访人"]);
+                //r.CallBackTime = DataTypeHelper.GetDateStringValue(row["回访时间"]);
                 r.status = DataTypeHelper.GetStringValue(row["状态"]);
                 //r.status = string.IsNullOrEmpty(r.AffirmComplete) ? r.status : "业主已确认";
-                r.status = string.IsNullOrEmpty(r.CallBackPerson) ? r.status : "已回访";
+                //r.status = string.IsNullOrEmpty(r.CallBackPerson) ? r.status : "已回访";
                 r.CompleteStatus = DataTypeHelper.GetStringValue(row["完成情况及所耗物料"]);
                 //r.LateTime = DataTypeHelper.GetDateStringValue(row["预计延期到"]);
                 r.type = DataTypeHelper.GetStringValue(row["上报原因"]);

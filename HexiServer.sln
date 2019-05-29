@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexiInnerCloudServer", "Hex
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexiPicture", "HexiPicture\HexiPicture.csproj", "{80EA6949-8ECB-4176-A15F-A6792132D857}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebMVCTest", "WebMVCTest\WebMVCTest.csproj", "{9D3B2DA7-4B9C-4006-9D6F-F83909AF0534}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexiLocalServer", "HexiLocalServer\HexiLocalServer.csproj", "{0EFFB17D-976C-4140-BF5D-5C31A1440DC3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{80EA6949-8ECB-4176-A15F-A6792132D857}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80EA6949-8ECB-4176-A15F-A6792132D857}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80EA6949-8ECB-4176-A15F-A6792132D857}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D3B2DA7-4B9C-4006-9D6F-F83909AF0534}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D3B2DA7-4B9C-4006-9D6F-F83909AF0534}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D3B2DA7-4B9C-4006-9D6F-F83909AF0534}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D3B2DA7-4B9C-4006-9D6F-F83909AF0534}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EFFB17D-976C-4140-BF5D-5C31A1440DC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EFFB17D-976C-4140-BF5D-5C31A1440DC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EFFB17D-976C-4140-BF5D-5C31A1440DC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EFFB17D-976C-4140-BF5D-5C31A1440DC3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

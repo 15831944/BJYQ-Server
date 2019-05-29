@@ -26,7 +26,7 @@ namespace HexiServer.Models
         public string ChargeTime { get; set; }//计费年月
         public string ChargeName { get; set; }//费用名称
         public string ChargeInfo { get; set; }//费用说明
-        public double? Charge { get; set; }//应收金额
+        public decimal? Charge { get; set; }//应收金额
         public string ChargeStatus { get; set; }//收费状态
         public int? ChargedId { get; set; }//收款ID
         public int? ReceiptId { get; set; }//收据ID

@@ -53,7 +53,7 @@ namespace HexiServer.Controllers
         }
 
 
-        public ActionResult OnGetChargeStatistics(string ztcode, string level, string month)
+        public ActionResult OnGetChargeStatistics(string ztcode, string level, string month, string ztName)
         {
             //StatusReport sr = new StatusReport();
             if (string.IsNullOrEmpty(level) || string.IsNullOrEmpty(month))
@@ -66,7 +66,7 @@ namespace HexiServer.Controllers
             }
             else if (level == "项目经理")
             {
-                return Json(ChargeDal.GetChargeStatisticsProject(month,ztcode));
+                return Json(ChargeDal.GetChargeStatisticsProject(month,ztcode,ztName));
             }
             else
             {

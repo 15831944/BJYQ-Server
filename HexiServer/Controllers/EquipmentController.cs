@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using System.IO;
 using HexiUtils;
 using HexiServer.Business;
+using HexiServer.Models;
 
 namespace HexiServer.Controllers
 {
@@ -102,6 +103,9 @@ namespace HexiServer.Controllers
             return Json(sr);
         }
 
+
+
+
         public ActionResult OnSearchEquipmentMaintain(string operationNumber)
         {
             StatusReport sr = new StatusReport();
@@ -117,7 +121,7 @@ namespace HexiServer.Controllers
         /// <param name="isDone"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult OnGetEquipmentTrouble(string classify, string isDone)
+        public ActionResult OnGetEquipmentTrouble(string classify, string isDone, string name)
         {
             StatusReport sr = new StatusReport();
             if (string.IsNullOrEmpty(classify) || string.IsNullOrEmpty(isDone))
@@ -126,7 +130,7 @@ namespace HexiServer.Controllers
                 sr.result = "信息不完整";
                 return Json(sr);
             }
-            sr = EquipmentDal.GetEquipmentTrouble(classify, isDone);
+            sr = EquipmentDal.GetEquipmentTrouble(classify, isDone, name);
             return Json(sr);
         }
 
@@ -163,14 +167,14 @@ namespace HexiServer.Controllers
             }
             try
             {
-                string mainPath = "F:\\wytws\\Files\\jczl_fwrwgl\\";
+                string mainPath = Comman.file_main_path + "基础资料_设备故障管理\\";
                 string imagePath = mainPath + Request.Files.AllKeys[0];
-                string sqlImagePath = Request.Files.AllKeys[0];
                 HttpPostedFileBase uploadImage = (Request.Files[0]);
                 uploadImage.SaveAs(imagePath);
                 string ID = Request.Form["id"];
                 string func = Request.Form["func"];
                 string index = Request.Form["index"];
+                string sqlImagePath = "~~-" + (3382 + Convert.ToInt32(index)) + "-" + ID.ToString() + "|" + Request.Files.AllKeys[0];
                 sr = EquipmentDal.SetEquipmentTroubleImage(ID, func, index, sqlImagePath);
                 return Json(sr);
             }

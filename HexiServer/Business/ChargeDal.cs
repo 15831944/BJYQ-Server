@@ -173,14 +173,14 @@ namespace HexiServer.Business
         public static StatusReport GetChargeList(string homeNumber, string name, string ztcode, string buildingNumber)
         {
             StatusReport sr = new StatusReport();
-            string sqlString = "SELECT 资源编号, 占用者名称, SUM(应收金额) AS 已收总额, 帐套代码 " +
+            string sqlString = "SELECT 房号, 占用者名称, SUM(应收金额) AS 已收总额, 帐套代码 " +
                                 "FROM 应收款APP " +
                                 "WHERE 帐套代码 = " + ztcode +
                                 " and 收费状态 is null " +
-                                (string.IsNullOrEmpty(homeNumber) ? "" : "and (资源编号 like '%" + homeNumber + "%') ") +
+                                (string.IsNullOrEmpty(homeNumber) ? "" : "and (房号 like '%" + homeNumber + "%') ") +
                                 (string.IsNullOrEmpty(buildingNumber) ? "" : "and (所属楼宇 like '%" + buildingNumber + "%') ") +
                                 (string.IsNullOrEmpty(name) ? "" : "and (占用者名称 like '%" + name + "%') ") +
-                                "GROUP BY 资源编号, 占用者名称, 帐套代码 " +
+                                "GROUP BY 房号, 占用者名称, 帐套代码 " +
                                 "ORDER BY 占用者名称";
             DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString);
             if (dt.Rows.Count == 0)
@@ -196,7 +196,7 @@ namespace HexiServer.Business
             {
                 Charged c = new Charged()
                 {
-                    RoomNumber = DataTypeHelper.GetStringValue(row["资源编号"]),
+                    RoomNumber = DataTypeHelper.GetStringValue(row["房号"]),
                     Name = DataTypeHelper.GetStringValue(row["占用者名称"]),
                     Total = DataTypeHelper.GetDoubleValue(row["已收总额"]),
                     ZTCode = DataTypeHelper.GetStringValue(row["帐套代码"]),
@@ -253,7 +253,7 @@ namespace HexiServer.Business
                     ChargeTime = DataTypeHelper.GetStringValue(row["计费年月"]),
                     ChargeName = DataTypeHelper.GetStringValue(row["费用名称"]),
                     ChargeInfo = DataTypeHelper.GetStringValue(row["费用说明"]),
-                    Charge = DataTypeHelper.GetDoubleValue(row["应收金额"]),
+                    Charge = DataTypeHelper.GetDecimalValue(row["应收金额"]),
                     ChargeStatus = DataTypeHelper.GetStringValue(row["收费状态"])
                 };
                 cdList.Add(cd);
@@ -395,7 +395,8 @@ namespace HexiServer.Business
                 receivableYear = DataTypeHelper.GetStringValue(drCompany["本年应收"]),
                 receiptYear = DataTypeHelper.GetStringValue(drCompany["本年实收"]),
                 earlierStage = DataTypeHelper.GetStringValue(drCompany["追缴前期"]),
-                collectionRate = DataTypeHelper.GetStringValue(drCompany["本年收缴率"])
+                collectionRate = DataTypeHelper.GetStringValue(drCompany["本年收缴率"]),
+                avgCollectionRate = DataTypeHelper.GetStringValue(drCompany["三年平均收缴率"])
             };
 
             List<object> list = new List<object>();
@@ -430,7 +431,7 @@ namespace HexiServer.Business
         /// <param name="month"></param>
         /// <param name="ztCode"></param>
         /// <returns></returns>
-        public static StatusReport GetChargeStatisticsProject(string month, string ztCode)
+        public static StatusReport GetChargeStatisticsProject(string month, string ztCode, string ztName)
         {
             string sqlString = "[dbo].[小程序_报表_考核_物业管理费绩效考核_管理处]";
             SqlParameter spMonth = SQLHelper.setParameterValue("@统计月份", month, SqlDbType.NVarChar);
@@ -452,12 +453,15 @@ namespace HexiServer.Business
                 receivableYear = DataTypeHelper.GetStringValue(dr["本年应收"]),
                 receiptYear = DataTypeHelper.GetStringValue(dr["本年实收"]),
                 earlierStage = DataTypeHelper.GetStringValue(dr["追缴前期"]),
-                collectionRate = DataTypeHelper.GetStringValue(dr["本年收缴率"])
+                collectionRate = DataTypeHelper.GetStringValue(dr["本年收缴率"]),
+                avgCollectionRate = DataTypeHelper.GetStringValue(dr["三年平均收缴率"])
             };
+            //Convert.ToDecimal(avg,ifor)
             StatusReport sr = new StatusReport();
             sr.status = "Success";
             sr.result = "Success";
             sr.data = new { project = item};
+            sr.parameters = sqlString;
             return sr;
         }
 

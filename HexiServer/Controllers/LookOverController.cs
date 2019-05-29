@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using HexiUtils;
 using HexiServer.Business;
+using HexiServer.Models;
 using System.IO;
 using Newtonsoft.Json;
 
@@ -12,28 +13,28 @@ namespace HexiServer.Controllers
 {
     public class LookOverController : Controller
     {
-        // GET: LookOver
-        public ActionResult OnGetLookOverInfo(string ztCode, string func, string period)
+        public ActionResult GetLookOverRouteInfo(string ztCode, string func, string name)
         {
             StatusReport sr = new StatusReport();
-            return Json(LookOverDal.GetLookOverInfo(ztCode, func,period));
-            //if (func == "空房巡检")
-            //{
-            //    return Json(LookOverDal.GetHouseLookOverInfo(ztCode, func));
-            //}
-            //else
-            //{
-            //    return Json(LookOverDal.GetNormalLookOverInfo(ztCode, func));
-            //}
+            return Json(LookOverDal.GetLookOverRouteInfo(ztCode, func, name));
         }
 
-        public ActionResult OnSetLookOverResult(string userName, string isSpotCheck, string items)
+        public ActionResult OnGetLookOverInfo(string ztCode, string func, string route, string name)
         {
-            return Json(LookOverDal.SetLookOverResult(userName,isSpotCheck,items));
+            StatusReport sr = new StatusReport();
+            return Json(LookOverDal.GetLookOverInfo(ztCode, func,route, name));
+            
+        }
+
+        public ActionResult OnSetLookOverResult(string isSpotCheck, string items)
+        {
+            return Json(LookOverDal.SetLookOverResult(isSpotCheck,items));
         }
 
         public ActionResult OnSetLookOverImage()
         {
+
+
             StatusReport sr = new StatusReport();
             if (Request.Files.Count == 0)
             {
@@ -43,9 +44,9 @@ namespace HexiServer.Controllers
             }
             try
             {
-                string mainPath = "F:\\wytws\\Files\\jczl_fwrwgl\\";
+                string mainPath = Comman.file_main_path + "基础资料_巡检记录\\";
                 string imagePath = mainPath + Request.Files.AllKeys[0];
-                string sqlImagePath = Request.Files.AllKeys[0];
+                //string sqlImagePath = Request.Files.AllKeys[0];
                 HttpPostedFileBase uploadImage = (Request.Files[0]);
                 uploadImage.SaveAs(imagePath);
                 string ID = Request.Form["id"];
@@ -56,6 +57,8 @@ namespace HexiServer.Controllers
                 //}
                 //string func = Request.Form["func"];
                 string index = Request.Form["index"];
+
+                string sqlImagePath = "~~-" + (3322 + Convert.ToInt32(index)) + "-" + ID.ToString() + "|" + Request.Files.AllKeys[0];
                 sr = LookOverDal.SetLookOverImage(ID, index, sqlImagePath);
                 return Json(sr);
             }
