@@ -412,7 +412,8 @@ namespace HexiServer.Business
                         receivableYear = DataTypeHelper.GetStringValue(drProject["本年应收"]),
                         receiptYear = DataTypeHelper.GetStringValue(drProject["本年实收"]),
                         earlierStage = DataTypeHelper.GetStringValue(drProject["追缴前期"]),
-                        collectionRate = DataTypeHelper.GetStringValue(drProject["本年收缴率"])
+                        collectionRate = DataTypeHelper.GetStringValue(drProject["本年收缴率"]),
+                        avgCollectionRate = DataTypeHelper.GetStringValue(drProject["三年平均收缴率"])
                     };
                     list.Add(itemProject);
                 }
