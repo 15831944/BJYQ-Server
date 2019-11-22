@@ -14,29 +14,29 @@ namespace HexiUserServer.Business
     { /// <summary>
       /// 获取满足条件的工单的列表
       /// </summary>
-      /// <param name="openId"></param>
-      /// <param name="ztcode"></param>
+      /// <param name="name"></param>
+      /// <param name="phone"></param>
       /// <returns></returns>
         public static StatusReport GetRepairOrder(string name, string phone)
         {
             StatusReport sr = new StatusReport();
             string sqlString =
-                "select top 100 " +
-                " ID,序号,部门,地址,报修人,联系电话,服务项目,服务类别," +
-                "紧急程度,报修说明,报修时间,预约服务时间,谈好上门时间,发单人,接单人,派工时间," +
-                "到场时间,操作人,完成时间,材料费,人工费,是否阅读,状态,完成情况及所耗物料," +
-                "报修前照片1,报修前照片2,报修前照片3,处理后照片1,处理后照片2,处理后照片3,业主确认完成,业主确认完成时间,业主评价,是否满意 " +
-                "from 基础资料_服务任务管理 " +
-                "where 报修人 = @报修人 and 联系电话 = @联系电话 " +
-                "order by ID desc ";
+                " select top 100 " +
+                " ID,序号,部门,地址,报修人,联系电话,服务项目,服务类别, " +
+                " 紧急程度,报修说明,报修时间,预约服务时间,谈好上门时间,发单人,接单人,派工时间, " +
+                " 到场时间,操作人,完成时间,材料费,人工费,是否阅读,状态,完成情况及所耗物料, " +
+                " 报修前照片1,报修前照片2,报修前照片3,处理后照片1,处理后照片2,处理后照片3 " +
+                //"业主确认完成,业主确认完成时间,业主评价,是否满意 " +
+                " from 基础资料_服务任务管理 " +
+                " where 报修人 = @报修人 and 联系电话 = @联系电话 " +
+                " order by ID desc ";
             DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString,
                 new SqlParameter("@报修人", name),
                 new SqlParameter("@联系电话", phone));
 
             if (dt.Rows.Count == 0)
             {
-                sr.status = "Fail";
-                sr.result = "未查询到符合条件的报修记录";
+                sr.SetFail("未查询到报修记录");
             }
             else
             {
@@ -70,10 +70,10 @@ namespace HexiUserServer.Business
                     r.IsRead = DataTypeHelper.GetIntValue(row["是否阅读"]);
                     r.status = DataTypeHelper.GetStringValue(row["状态"]);
                     r.CompleteStatus = DataTypeHelper.GetStringValue(row["完成情况及所耗物料"]);
-                    r.IsSatisfying = DataTypeHelper.GetStringValue(row["是否满意"]);
-                    r.AffirmComplete = DataTypeHelper.GetStringValue(row["业主确认完成"]);
-                    r.AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(row["业主评价"]);
-                    r.AffirmCompleteTime = DataTypeHelper.GetDateStringValue(row["业主确认完成时间"]);
+                    //r.IsSatisfying = DataTypeHelper.GetStringValue(row["是否满意"]);
+                    //r.AffirmComplete = DataTypeHelper.GetStringValue(row["业主确认完成"]);
+                    //r.AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(row["业主评价"]);
+                    //r.AffirmCompleteTime = DataTypeHelper.GetDateStringValue(row["业主确认完成时间"]);
                     beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片1"]));
                     beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片2"]));
                     beforeList.Add(DataTypeHelper.GetStringValue(row["报修前照片3"]));

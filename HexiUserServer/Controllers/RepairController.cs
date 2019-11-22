@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using HexiUtils;
 using HexiUserServer.Business;
+using HexiUserServer.Models;
 
 namespace HexiUserServer.Controllers
 {
@@ -60,10 +61,13 @@ namespace HexiUserServer.Controllers
             return Json(sr);
         }
 
+
+
         /// <summary>
-        /// 上传报修图片
+        /// 保存工单照片
         /// </summary>
         /// <returns></returns>
+        [HttpPost]
         public ActionResult OnSetRepairImage()
         {
             StatusReport sr = new StatusReport();
@@ -75,14 +79,13 @@ namespace HexiUserServer.Controllers
             }
             try
             {
-                string mainPath = "F:\\wytws\\Files\\jczl_fwrwgl\\";
-                string imagePath = mainPath + Request.Files.AllKeys[0];
+                string imagePath = Config.repairImageMainPath + Request.Files.AllKeys[0];
                 string sqlImagePath = Request.Files.AllKeys[0];
                 HttpPostedFileBase uploadImage = (Request.Files[0]);
                 uploadImage.SaveAs(imagePath);
                 string ID = Request.Form["id"];
-                string func = Request.Form["func"];
-                string index = Request.Form["index"];
+                string func = Request.Form["func"];//区分报修前还是报修后
+                string index = Request.Form["index"];//区分是图片几
                 sr = RepairDal.SetRepairImage(ID, func, index, sqlImagePath);
                 return Json(sr);
             }
@@ -93,6 +96,40 @@ namespace HexiUserServer.Controllers
                 return Json(sr);
             }
         }
+
+        /// <summary>
+        /// 上传报修图片
+        /// </summary>
+        /// <returns></returns>
+        //public ActionResult OnSetRepairImage()
+        //{
+        //    StatusReport sr = new StatusReport();
+        //    if (Request.Files.Count == 0)
+        //    {
+        //        sr.status = "Fail";
+        //        sr.result = "没有图片";
+        //        return Json(sr);
+        //    }
+        //    try
+        //    {
+        //        string mainPath = "F:\\wytws\\Files\\jczl_fwrwgl\\";
+        //        string imagePath = mainPath + Request.Files.AllKeys[0];
+        //        string sqlImagePath = Request.Files.AllKeys[0];
+        //        HttpPostedFileBase uploadImage = (Request.Files[0]);
+        //        uploadImage.SaveAs(imagePath);
+        //        string ID = Request.Form["id"];
+        //        string func = Request.Form["func"];
+        //        string index = Request.Form["index"];
+        //        sr = RepairDal.SetRepairImage(ID, func, index, sqlImagePath);
+        //        return Json(sr);
+        //    }
+        //    catch (NotImplementedException exp)
+        //    {
+        //        sr.status = "Fail";
+        //        sr.result = exp.Message;
+        //        return Json(sr);
+        //    }
+        //}
 
 
         public ActionResult OnEvaluation(string evaluation, string isSatisfying, string isFinish, string id)

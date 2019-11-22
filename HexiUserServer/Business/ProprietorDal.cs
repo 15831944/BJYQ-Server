@@ -22,23 +22,11 @@ namespace HexiUserServer.Business
         public static StatusReport CheckOpenIdExist(string openId)
         {
             StatusReport sr = new StatusReport();
-
-            //string sqlString =
-            //    "select " +
-            //    "占用者ID " +
-            //    "from 基础资料_微信占用者绑定表 " +
-            //    "where OpenID = @OpenId";
-
-            //int proprietorId = SQLHelper.ExecuteScalar("wyt", sqlString,
-            //    new SqlParameter("@OpenId", openId));
-
-            //if (proprietorId > 0)
-            //{
             string sqlStr =
-                " SELECT ID, 房产单元ID, 房产单元编号, 姓名, 联系电话, 帐套名称, 帐套代码, 客服专员 ,是否占用者本人 " +
+                " SELECT ID, 房产单元ID, 房产单元编号, 姓名, 联系人手机, 帐套名称, 帐套代码 " +
                 " FROM dbo.小程序_业主信息 " +
-                " where OpenID = @OpenID";
-            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlStr, new SqlParameter("@OpenID", openId));
+                " where openid = @openid";
+            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlStr, new SqlParameter("@openid", openId));
             if (dt.Rows.Count == 0)
             {
                 sr.status = "Fail";
@@ -52,81 +40,41 @@ namespace HexiUserServer.Business
             //proprietor.RoomId = DataTypeHelper.GetIntValue(dr["房产单元ID"]);
             //proprietor.RoomNumber = DataTypeHelper.GetStringValue(dr["房产单元编号"]);
             proprietor.Name = DataTypeHelper.GetStringValue(dr["姓名"]);
-            proprietor.Phone = DataTypeHelper.GetStringValue(dr["联系电话"]);
-            proprietor.ZTName = DataTypeHelper.GetStringValue(dr["帐套名称"]);
-            proprietor.ZTCode = DataTypeHelper.GetStringValue(dr["帐套代码"]);
-            proprietor.Server = DataTypeHelper.GetStringValue(dr["客服专员"]);
-            proprietor.IsProprietor = DataTypeHelper.GetStringValue(dr["是否占用者本人"]);
+            proprietor.Phone = DataTypeHelper.GetStringValue(dr["联系人手机"]);
+            //proprietor.ZTName = DataTypeHelper.GetStringValue(dr["帐套名称"]);
+            //proprietor.ZTCode = DataTypeHelper.GetStringValue(dr["帐套代码"]);
             List<RoomInfo> pList = new List<RoomInfo>();
             foreach (DataRow datarow in dt.Rows)
             {
                 RoomInfo roomInfo = new RoomInfo();
                 roomInfo.RoomNumber = DataTypeHelper.GetStringValue(datarow["房产单元编号"]);
                 roomInfo.RoomId = DataTypeHelper.GetIntValue(datarow["房产单元ID"]);
+                roomInfo.ZTName = DataTypeHelper.GetStringValue(datarow["帐套名称"]);
+                roomInfo.ZTCode = DataTypeHelper.GetStringValue(datarow["帐套代码"]);
                 pList.Add(roomInfo);
             }
             proprietor.Room = pList.ToArray();
-            sr.status = "Success";
-            sr.result = "成功";
-            sr.data = JsonConvert.SerializeObject(proprietor);
-            return sr;
-            //}
-            //else
-            //{
-            //    sr.status = "Fail";
-            //    sr.result = "无此用户";
-            //    return sr;
-            //}
+            return sr.SetSuccess(proprietor);
         }
 
-
-
         /// <summary>
-        /// 判断该占用者是否存在
+        /// 生成验证码
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="userName"></param>
         /// <param name="phoneNumber"></param>
         /// <returns></returns>
-        public static int CheckProprietorExist(string userName, string phoneNumber)
+        public static StatusReport getCode(string userName, string phoneNumber)
         {
-            //string sqlString =
-            //    "select " +
-            //    "ID " +
-            //    "from 用户 " +
-            //    "where UserCode = @UserCode and Password = @Password";
-
-            //int id = SQLHelper.ExecuteScalar(sqlString,
-            //    new SqlParameter("@UserCode",name),
-            //    new SqlParameter("@Password",password));
-            string sqlString =
-               "select " +
-               "ID " +
-               "from 资源占用者 " +
-               "where 占用者名称 = @占用者名称 and 联系电话 like '%" + phoneNumber + "%' " +
-               "select @@IDENTITY";
-
-            int id = SQLHelper.ExecuteScalar("wyt", sqlString,
-                new SqlParameter("@占用者名称", userName));
-
-            if (id > 0)
+            StatusReport sr = new StatusReport();
+            if (CheckProprietorExist(userName, phoneNumber))
             {
-                return id;
+                Random random = new Random();
+                int randomNumber = random.Next(100000, 999999);
+                return sr.SetSuccess(randomNumber.ToString());
             }
             else
             {
-                sqlString = "select ID from 资源占用者 where ID = " +
-                    " (select 占用者ID from 占用资料 where ID = " +
-                    " (select PID from 占用资料_占用人员详情 where 姓名 = @姓名 and 联系电话 like '%" + phoneNumber + "%')) " +
-                    " select @@IDENTITY ";
-                id = SQLHelper.ExecuteScalar("wyt", sqlString, new SqlParameter("@姓名", userName));
-                if (id > 0)
-                {
-                    return -(id);
-                }
-                else
-                {
-                    return 0;
-                }
+                return sr.SetFail("业主不存在，请核对姓名和手机号后重试，如有疑问，敬请联系物业公司");
             }
         }
 
@@ -136,21 +84,14 @@ namespace HexiUserServer.Business
         /// <param name="id"></param>
         /// <param name="openId"></param>
         /// <returns></returns>
-        public static StatusReport BindProprietor(int id, string name, string phoneNumber, string openId, bool isProprietor)
+        public static StatusReport BindProprietor(string name, string phoneNumber, string openId)
         {
-            string sqlString =
-                "if not exists (select ID from 基础资料_微信占用者绑定表 where 占用者ID=@占用者ID and openid = @OpenID) "+
-                "insert into 基础资料_微信占用者绑定表 " +
-                "(占用者ID , openid, 姓名, 联系电话, 是否占用者本人) " +
-                "select @占用者ID, @OpenID, @姓名, @联系电话, @是否占用者本人 " +
-                "select @@IDENTITY ";
+            string sqlString = "update 资源占用者 set openid = @openid where 占用者名称 = @姓名 and 联系人手机 = @联系人手机";
 
-            StatusReport sr = SQLHelper.Insert("wyt", sqlString,
-                new SqlParameter("@占用者ID", id),
+            StatusReport sr = SQLHelper.Update("wyt", sqlString,
                 new SqlParameter("@OpenID", openId),
                 new SqlParameter("@姓名", name),
-                new SqlParameter("@联系电话", phoneNumber),
-                new SqlParameter("@是否占用者本人", isProprietor ? "是" : "否"));
+                new SqlParameter("@联系人手机", phoneNumber));
 
             return sr;
         }
@@ -244,6 +185,46 @@ namespace HexiUserServer.Business
             }
             return sr;
 
+        }
+
+
+        /// <summary>
+        /// 判断该占用者是否存在
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="phoneNumber"></param>
+        /// <returns></returns>
+        private static bool CheckProprietorExist(string userName, string phoneNumber)
+        {
+            string sqlString =
+               "select " +
+               "ID " +
+               "from 资源占用者 " +
+               "where 占用者名称 = @占用者名称 and 联系人手机 like '%" + phoneNumber + "%' " +
+               "select @@IDENTITY";
+            int id = SQLHelper.ExecuteScalar("wyt", sqlString,
+                new SqlParameter("@占用者名称", userName));
+            return id > 0 ? true : false;
+            //if (id > 0)
+            //{
+            //    return true;
+            //}
+            //else
+            //{
+            //    sqlString = "select ID from 资源占用者 where ID = " +
+            //        " (select 占用者ID from 占用资料 where ID = " +
+            //        " (select PID from 占用资料_占用人员详情 where 姓名 = @姓名 and 联系人手机 like '%" + phoneNumber + "%')) " +
+            //        " select @@IDENTITY ";
+            //    id = SQLHelper.ExecuteScalar("wyt", sqlString, new SqlParameter("@姓名", userName));
+            //    if (id > 0)
+            //    {
+            //        return -(id);
+            //    }
+            //    else
+            //    {
+            //        return 0;
+            //    }
+            //}
         }
 
 

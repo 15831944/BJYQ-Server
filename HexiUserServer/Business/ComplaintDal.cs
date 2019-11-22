@@ -27,20 +27,22 @@ namespace HexiUserServer.Business
             return sr;
         }
 
-        public static StatusReport GetComplaintList(string classify, string name, string phone)
+        public static StatusReport GetComplaintList(string name, string phone)
         {
             StatusReport sr = new StatusReport()
             {
                 status = "Success",
                 result = "成功",
             };
-            string sqlString = " select ID,投诉接待时间,投诉方式,投诉人姓名,地址,投诉内容,联系电话,投诉处理单编号,处理完成日期,处理完成情况,登记人,责任部门," +
-                               " 投诉前照片1,投诉前照片2,投诉前照片3,处理后照片1,处理后照片2,处理后照片3,状态,业主确认解决,确认时间,是否满意,业主评价,不受理原因 " +
+            string sqlString = " select ID,投诉接待时间,投诉方式,投诉人姓名,地址,投诉内容,联系电话,投诉处理单编号,处理完成情况,登记人,责任部门," +
+                               " 投诉照片1,投诉照片2,投诉照片3,处理后照片1,处理后照片2,处理后照片3,状态," +
+                               //"业主确认解决,确认时间,是否满意,处理完成日期,业主评价," +
+                               "不受理原因 " +
                                " from 基础资料_顾客投诉处理登记表 " +
-                               " where 分类 = @分类 and 投诉人姓名 = @投诉人姓名 and 联系电话 = @联系电话 " +
+                               " where 投诉人姓名 = @投诉人姓名 and 联系电话 = @联系电话 " +
                                " order by ID desc ";
             DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString,
-                new SqlParameter("@分类", classify),
+                //new SqlParameter("@分类", classify),
                 new SqlParameter("@投诉人姓名", name),
                 new SqlParameter("@联系电话", phone));
             
@@ -66,20 +68,20 @@ namespace HexiUserServer.Business
                     Content = DataTypeHelper.GetStringValue(dr["投诉内容"]),
                     Phone = DataTypeHelper.GetStringValue(dr["联系电话"]),
                     Number = DataTypeHelper.GetStringValue(dr["投诉处理单编号"]),
-                    FinishDate = DataTypeHelper.GetDateStringValue(dr["处理完成日期"]),
+                    //FinishDate = DataTypeHelper.GetDateStringValue(dr["处理完成日期"]),
                     FinishStatus = DataTypeHelper.GetStringValue(dr["处理完成情况"]),
                     Registrant = DataTypeHelper.GetStringValue(dr["登记人"]),
                     Department = DataTypeHelper.GetStringValue(dr["责任部门"]),
                     Status = DataTypeHelper.GetStringValue(dr["状态"]),
-                    IsSatisfying = DataTypeHelper.GetStringValue(dr["是否满意"]),
-                    AffirmComplete = DataTypeHelper.GetStringValue(dr["业主确认解决"]),
-                    AffirmCompleteTime = DataTypeHelper.GetDateStringValue(dr["确认时间"]),
-                    AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(dr["业主评价"]),
+                    //IsSatisfying = DataTypeHelper.GetStringValue(dr["是否满意"]),
+                    //AffirmComplete = DataTypeHelper.GetStringValue(dr["业主确认解决"]),
+                    //AffirmCompleteTime = DataTypeHelper.GetDateStringValue(dr["确认时间"]),
+                    //AffirmCompleteEvaluation = DataTypeHelper.GetStringValue(dr["业主评价"]),
                     CaseDeclinedReason = DataTypeHelper.GetStringValue(dr["不受理原因"])
                 };
-                beforeList.Add(DataTypeHelper.GetStringValue(dr["投诉前照片1"]));
-                beforeList.Add(DataTypeHelper.GetStringValue(dr["投诉前照片2"]));
-                beforeList.Add(DataTypeHelper.GetStringValue(dr["投诉前照片3"]));
+                beforeList.Add(DataTypeHelper.GetStringValue(dr["投诉照片1"]));
+                beforeList.Add(DataTypeHelper.GetStringValue(dr["投诉照片2"]));
+                beforeList.Add(DataTypeHelper.GetStringValue(dr["投诉照片3"]));
                 complaint.BeforeImage = beforeList.ToArray();
                 afterList.Add(DataTypeHelper.GetStringValue(dr["处理后照片1"]));
                 afterList.Add(DataTypeHelper.GetStringValue(dr["处理后照片2"]));
@@ -95,7 +97,7 @@ namespace HexiUserServer.Business
         public static StatusReport SetComplainImage(string ID, string func, string index, string sqlImagePath)
         {
             StatusReport sr = new StatusReport();
-            string itemName = func == "before" ? "投诉前照片" + index.ToString() : "处理后照片" + index.ToString();
+            string itemName = func == "before" ? "投诉照片" + index.ToString() : "处理后照片" + index.ToString();
             string sqlString = " update 基础资料_顾客投诉处理登记表 set " + itemName + " = @路径 " +
                                " where ID = @ID ";
             sr = SQLHelper.Update("wyt", sqlString,

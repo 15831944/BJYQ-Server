@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace HexiUtils
 {
@@ -33,11 +34,12 @@ namespace HexiUtils
             this.data = data;
         }
 
-        public void SetSuccess(object data)
+        public StatusReport SetSuccess(object data)
         {
             this.status = "Success";
             this.result = "成功";
             this.data = data;
+            return this;
         }
 
         public StatusReport SetFail()

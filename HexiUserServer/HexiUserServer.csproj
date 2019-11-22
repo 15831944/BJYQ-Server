@@ -117,6 +117,7 @@
     <Compile Include="Business\DeliveryDal.cs" />
     <Compile Include="Business\HouseDal.cs" />
     <Compile Include="Business\MyServerDal.cs" />
+    <Compile Include="Business\NoticeDal.cs" />
     <Compile Include="Business\ProprietorDal.cs" />
     <Compile Include="Business\RepairDal.cs" />
     <Compile Include="Business\WXPayDal.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="Controllers\DeliveryController.cs" />
     <Compile Include="Controllers\HouseController.cs" />
     <Compile Include="Controllers\MyServerController.cs" />
+    <Compile Include="Controllers\NoticeController.cs" />
     <Compile Include="Controllers\RepairController.cs" />
     <Compile Include="Controllers\SMSTestController.cs" />
     <Compile Include="Controllers\WXUserController.cs" />
@@ -136,6 +138,7 @@
     <Compile Include="Models\Charge.cs" />
     <Compile Include="Models\Common.cs" />
     <Compile Include="Models\Complaint.cs" />
+    <Compile Include="Models\Config.cs" />
     <Compile Include="Models\Delivery.cs" />
     <Compile Include="Models\House.cs" />
     <Compile Include="Models\MyServer.cs" />
@@ -164,6 +167,7 @@
     <Folder Include="Views\Delivery\" />
     <Folder Include="Views\House\" />
     <Folder Include="Views\MyServer\" />
+    <Folder Include="Views\Notice\" />
     <Folder Include="Views\Repair\" />
     <Folder Include="Views\SMSTest\" />
     <Folder Include="Views\WXUser\" />

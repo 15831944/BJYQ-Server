@@ -23,18 +23,23 @@ namespace HexiServer.Controllers
         [HttpPost]
         public ActionResult OnLogin(string code)
         {
+            StatusReport sr = new StatusReport();
             var jsonResult = SnsApi.JsCode2Json(Common.Appid, Common.AppSecret, code);
             if (jsonResult.errcode == Senparc.Weixin.ReturnCode.请求成功)
             {
-                //Session["WxOpenUser"] = jsonResult;
                 var sessionBag = SessionContainer.UpdateSession(null, jsonResult.openid, jsonResult.session_key);
                 Session[sessionBag.Key] = jsonResult;
                 Session.Timeout = 60;
-                return Json(new { success = true, msg = "OK", sessionId = sessionBag.Key, result = Session[sessionBag.Key] });
+                string openId = sessionBag.OpenId;
+                sr = ProprietorDal.CheckOpenIdExist(openId);
+                sr.parameters = sessionBag.Key;
+                return Json(sr);
+                //return Json(new { success = true, msg = "OK", sessionId = sessionBag.Key, result = Session[sessionBag.Key] });
             }
             else
             {
-                return Json(new { success = false, mag = jsonResult.errmsg, result = jsonResult });
+                return Json(sr.SetFail("微信登录失败：" + jsonResult.errmsg));
+                //return Json(new { success = false, mag = jsonResult.errmsg, result = jsonResult });
             }
         }
 
@@ -89,98 +94,32 @@ namespace HexiServer.Controllers
         public ActionResult OnBindUser(string userName, string phoneNumber, string sessionId)
         {
             StatusReport sr = new StatusReport();
+            if (string.IsNullOrEmpty(sessionId))//如果sessionId为空，则返回错误信息
+            {
+                sr.status = "Fail";
+                sr.result = "sessionId不存在";
+                sr.parameters = sessionId;
+                return Json(sr);
+            }
             SessionBag sessionBag = null;
             sessionBag = SessionContainer.GetSession(sessionId);
-            //string sessionCode = (string)sessionBag.Name;
-            //string sessionCode =(string)HttpContext.Session[phoneNumber];
-
-            if (sessionBag == null)//如果sessionId失效，返回失败信息
+            if (sessionBag == null)
             {
                 sr.status = "Fail";
                 sr.result = "session已失效";
-                return Json(sr, JsonRequestBehavior.AllowGet);
+                return Json(sr);
             }
-
-            //if (string.IsNullOrEmpty(sessionCode))//如果sessionCode失效，返回失败信息
-            //{
-            //    sr.status = "Fail";
-            //    sr.result = "codeSession已失效";
-            //    sr.parameters = phoneNumber;
-            //    return Json(sr,JsonRequestBehavior.AllowGet);
-            //}
-
-            //if (code != sessionCode)//如果验证码与用户收到的验证码不一致，返回失败信息
-            //{
-            //    sr.status = "Fail";
-            //    sr.result = "code错误";
-            //    return Json(sr, JsonRequestBehavior.AllowGet);
-            //}
-
             string openId = sessionBag.OpenId;
-            int id = ProprietorDal.CheckProprietorExist(userName, phoneNumber);
-            string temp = id != 0 ? "存在" : "不存在";
-            if (id != 0)
-            {
-                sr = ProprietorDal.BindProprietor(Math.Abs(id), userName, phoneNumber, openId, id > 0 ? true : false);
-                return Json(sr, JsonRequestBehavior.AllowGet);
-            }
-            else
-            {
-                var data = new
-                {
-                    msg = "hello world",
-                    username = userName,
-                    phoneNumber = phoneNumber,
-                    isExist = temp
-                };
-                return Json(data, JsonRequestBehavior.AllowGet);
-            }
+            return Json(ProprietorDal.BindProprietor(userName, phoneNumber, openId));
+
         }
+
+
+
         [HttpPost]
         public ActionResult OnGetCode(string userName, string phoneNumber)
         {
-            
-            //StatusReport sr = new StatusReport();
-            //SessionBag sessionBag = null;
-            //sessionBag = SessionContainer.GetSession(sessionId);
-            //if (sessionBag == null)
-            //{
-            //    sr.status = "Fail";
-            //    sr.result = "session已失效";
-            //    return Json(sr);
-            //}
-            //string openId = sessionBag.OpenId;
-            int id = ProprietorDal.CheckProprietorExist(userName, phoneNumber);
-            string temp = id > 0 ? "存在" : "不存在";
-            if (id != 0)
-            {
-                string code = getCode();
-                //SessionBag sessionBag = null;
-                //sessionBag = SessionContainer.GetSession(sessionId);
-                //sessionBag.Name = code;
-                //filterContext.HttpContext.Session.Add(phoneNumber, code);
-                //Session[phoneNumber] = code;
-                //Session.Timeout = 60;
-                var data = new
-                {
-                    msg = "success",
-                    code = code,
-                    status = "exist"
-                };
-                return Json(data);
-                //sr = ProprietorDal.BindProprietor(id, openId);
-                //return Json(sr);
-            }
-            else
-            {
-                var data = new
-                {
-                    msg = "fail",
-                    code = "",
-                    status = "notexist"
-                };
-                return Json(data);
-            }
+            return Json(ProprietorDal.getCode(userName, phoneNumber));
         }
 
         /// <summary>
@@ -211,14 +150,6 @@ namespace HexiServer.Controllers
         public ActionResult OnGetFamilyMembers(int id)
         {
             return Json(ProprietorDal.GetFamilyMembers(id));
-        }
-
-
-        private static string getCode()
-        {
-            Random random = new Random();
-            int randomNumber = random.Next(100000, 999999);
-            return randomNumber.ToString();
         }
     }
 }

@@ -11,17 +11,17 @@ namespace HexiUserServer.Controllers
     public class DeliveryController : Controller
     {
         [HttpPost]
-        public ActionResult OnGetDelivery(string ztCode, string phone)
+        public ActionResult OnGetDelivery(string phone)
         {
             StatusReport sr = new StatusReport();
-            if (string.IsNullOrEmpty(ztCode) || string.IsNullOrEmpty(phone))
+            if (string.IsNullOrEmpty(phone))
             {
                 sr.status = "Fail";
                 sr.result = "查询参数不完整";
             }
             else
             {
-                sr = DeliveryDal.GetDelivery(ztCode, phone);
+                sr = DeliveryDal.GetDelivery(phone);
             }
             return Json(sr);
         }

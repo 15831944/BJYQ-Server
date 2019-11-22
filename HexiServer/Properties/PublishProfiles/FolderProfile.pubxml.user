@@ -11,10 +11,10 @@
   </PropertyGroup>
   <ItemGroup>
     <File Include="bin/HexiServer.dll">
-      <publishTime>07/22/2019 11:54:06</publishTime>
+      <publishTime>09/05/2019 23:05:42</publishTime>
     </File>
     <File Include="bin/HexiServer.pdb">
-      <publishTime>07/22/2019 11:54:06</publishTime>
+      <publishTime>09/05/2019 23:05:42</publishTime>
     </File>
     <File Include="bin/HexiUtils.dll">
       <publishTime>07/22/2019 11:50:35</publishTime>

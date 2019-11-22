@@ -10,6 +10,8 @@ namespace HexiUserServer.Models
     {
         public int? RoomId { get; set; }
         public string RoomNumber { get; set; }
+        public string ZTCode { get; set; }//帐套代码
+        public string ZTName { get; set; }//帐套名称 
     }
     public class Proprietor
     {
@@ -22,8 +24,6 @@ namespace HexiUserServer.Models
         public string Phone { get; set; }//联系电话
         public string Address { get; set; }//联系地址
         //public string IDNumber { get; set; }//证件号码
-        public string ZTCode { get; set; }//帐套代码
-        public string ZTName { get; set; }//帐套名称 
         public string Server { get; set; }//客服专员
 
         public string IsProprietor { get; set; }//是否占用者本人

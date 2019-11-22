@@ -16,7 +16,7 @@ namespace HexiServer.Business
     {
         public static StatusReport GetLookOverRouteInfo(string ztCode, string func, string name)
         {
-            string sqlString = "select distinct ID, 巡检路线 from dbo.基础资料_巡检记录 where 分类 = @分类 and 巡检业务 = @巡检业务 and 巡检人 = @巡检人 and 工作日期 = @工作日期 order by ID";
+            string sqlString = "select distinct 巡检路线 from dbo.基础资料_巡检记录 where 分类 = @分类 and 巡检业务 = @巡检业务 and 巡检人 like '%' + @巡检人 + '%' and 工作日期 = @工作日期";
             DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, 
                 new SqlParameter("@分类", ztCode), 
                 new SqlParameter("@巡检业务", func),
@@ -43,7 +43,7 @@ namespace HexiServer.Business
             
             string sqlString =
                 " SELECT ID, 巡检业务, 巡检点, 巡检项目, 巡检时间 " +
-                " FROM dbo.基础资料_巡检记录 where 分类 = @分类 and 巡检业务 = @巡检业务 and 巡检路线 = @巡检路线 and 巡检人 = @巡检人 and 工作日期 = @工作日期 ";
+                " FROM dbo.基础资料_巡检记录 where 分类 = @分类 and 巡检业务 = @巡检业务 and 巡检路线 = @巡检路线 and 巡检人 like '%' + @巡检人 + '%' and 工作日期 = @工作日期 ";
                   //condition +
                 //" order by 巡检对象, 巡检项目, 巡检周期 ";
             DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, 

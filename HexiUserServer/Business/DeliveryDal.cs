@@ -11,15 +11,15 @@ namespace HexiUserServer.Business
 {
     public class DeliveryDal
     {
-        public static StatusReport GetDelivery(string ztcode, string phone)
+        public static StatusReport GetDelivery(string phone)
         {
             StatusReport sr = new StatusReport();
-            string sqlString =  " SELECT ID, 分类, 收件人地址, 收件人, 联系电话, 物品描述, 送件人, 送件时间, 领取人, 领取人电话,领取时间, 登记人, 登记时间, 状态 " +
+            string sqlString =  " SELECT ID, 收件人地址, 收件人, 联系电话, 物品描述, 送件人, 送件时间, 领取人, 领取人电话,领取时间, 登记人, 登记时间, 状态 " +
                                 " FROM dbo.基础资料_代收管理 " +
-                                " WHERE   (分类 = @分类) AND (联系电话 = @联系电话) " +
+                                " WHERE (联系电话 = @联系电话) " +
                                 " ORDER BY ID DESC";
             DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString,
-                new SqlParameter("@分类", ztcode),
+                //new SqlParameter("@分类", ztcode),
                 new SqlParameter("@联系电话", phone));
             if (dt.Rows.Count == 0)
             {
@@ -33,7 +33,7 @@ namespace HexiUserServer.Business
                 {
                     Delivery delivery = new Delivery()
                     {
-                        Classify = DataTypeHelper.GetStringValue(dr["分类"]),
+                        //Classify = DataTypeHelper.GetStringValue(dr["分类"]),
                         Address = DataTypeHelper.GetStringValue(dr["收件人地址"]),
                         GoodsInfo = DataTypeHelper.GetStringValue(dr["物品描述"]),
                         Addressee = DataTypeHelper.GetStringValue(dr["收件人"]),
