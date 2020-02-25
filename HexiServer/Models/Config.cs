@@ -10,7 +10,7 @@ namespace HexiServer.Models
         /// <summary>
         /// 物业通图片存储主路径
         /// </summary>
-        public const string imageMainPath = "D:\\Servers\\bjyqServer\\wgxt\\WYTWS\\Files\\";//物业通图片存储主路径
+        public const string imageMainPath = @"D:\wgxt\wgxt\wgxt\WYTWS\Files\";//物业通图片存储主路径
 
 
         /// <summary>

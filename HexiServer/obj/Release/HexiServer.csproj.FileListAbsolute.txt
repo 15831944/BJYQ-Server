@@ -107,7 +107,6 @@ C:\Users\dilus\Documents\GitHub\BJYQ-Server\HexiServer\obj\Release\HexiServer.cs
 C:\Users\dilus\Documents\GitHub\BJYQ-Server\HexiServer\obj\Release\HexiServer.dll
 C:\Users\dilus\Documents\GitHub\BJYQ-Server\HexiServer\obj\Release\HexiServer.pdb
 C:\Users\Admin\Documents\GitHub\BJYQ-Server\HexiServer\obj\Release\HexiServer.csprojAssemblyReference.cache
-C:\Users\Admin\Documents\GitHub\BJYQ-Server\HexiServer\obj\Release\HexiServer.csproj.CoreCompileInputs.cache
 C:\Users\Admin\Documents\GitHub\BJYQ-Server\HexiServer\obj\Release\HexiServer.dll
 C:\Users\Admin\Documents\GitHub\BJYQ-Server\HexiServer\obj\Release\HexiServer.pdb
 C:\Users\Admin\Documents\GitHub\BJYQ-Server\HexiServer\bin\HexiServer.dll.config

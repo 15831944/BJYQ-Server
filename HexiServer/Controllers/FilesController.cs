@@ -9,6 +9,7 @@ using HexiUtils;
 using System.Net;
 using System.Collections.Specialized;
 using HexiServer.Business;
+using HexiServer.Models;
 using Newtonsoft.Json.Linq;
 
 namespace HexiServer.Controllers
@@ -23,7 +24,7 @@ namespace HexiServer.Controllers
             string recordId = docTemp[docTemp.Length - 2];//记录ID
             string fileName = docTemp[docTemp.Length - 1];//文件名
             string fileType = fileName.Split('.')[fileName.Split('.').Length - 1];//文件类型
-            string fileFullName = "C:\\inetpub\\Files\\" + docTableName + "\\" + recordId + "\\" + fileName;
+            string fileFullName = @"D:\wgxt\wgxt\wgxt\WYTWS\Files\" + docTableName + "\\" + recordId + "\\" + fileName;
             FileStream fStream = null;
             try
             {
@@ -193,7 +194,7 @@ namespace HexiServer.Controllers
             //string func = Request.Form["func"];
             //string index = Request.Form["index"];
             string path = Request.Form["path"];
-            string mainPath = "C:\\inetpub\\Files\\";
+            string mainPath = Comman.file_main_path;
             try
             {
                 string fileName = Request.Files.AllKeys[0];

@@ -19,9 +19,9 @@ namespace HexiServer.Business
             string buildingNumberCondition = string.IsNullOrEmpty(buildingNumber) ? "" : " and (所属楼宇 like @所属楼宇) ";
             string nameCondition = string.IsNullOrEmpty(name) ? "" : " and (占用者名称 like @占用者名称) ";
             string sqlString = "" +
-                                "SELECT 房产单元编号, 占用者名称, SUM(应收金额) AS 已收总额, 帐套代码 " +
-                                "FROM dbo.小程序_已收查询 " +
-                                "WHERE 帐套代码 = @帐套代码" +
+                                " SELECT 房产单元编号, 占用者名称, SUM(应收金额) AS 已收总额, 帐套代码 " +
+                                " FROM dbo.小程序_已收查询 " +
+                                " WHERE 帐套代码 = @帐套代码 " +
                                 homeNumberCondition +
                                 buildingNumberCondition +
                                 nameCondition +
@@ -466,14 +466,19 @@ namespace HexiServer.Business
             return sr;
         }
 
-        public static StatusReport GetMonthChargeStatistics(string ztcode, string level, string startTime)
+        public static StatusReport GetMonthChargeStatisticsProject(string ztcode, string startTime, string endTime)
         {
             string sqlString = "[dbo].[小程序_报表_财务_月收费统计_管理处]";
             SqlParameter spStartTime = SQLHelper.setParameterValue("@统计开始时间", Convert.ToDateTime(startTime), SqlDbType.Date);
+            SqlParameter spEndTime = SQLHelper.setParameterValue("@统计结束时间", Convert.ToDateTime(endTime), SqlDbType.Date);
             SqlParameter spZTCode = SQLHelper.setParameterValue("@帐套代码", ztcode, SqlDbType.NVarChar);
             //SqlParameter spStartTime = new SqlParameter("@统计开始时间",SqlDbType.DateTime)
 
-            DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString, spStartTime, spZTCode);
+            DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString, spStartTime, spEndTime, spZTCode);
+            if (ds.Tables.Count == 0)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
             DataTable dt = ds.Tables[0];
             if (dt.Rows.Count == 0)
             {
@@ -502,7 +507,66 @@ namespace HexiServer.Business
             sr.data = list.ToArray();
             return sr;
         }
-        
+
+        public static StatusReport GetMonthChargeStatisticsCompany(string startTime, string endTime)
+        {
+            string sqlString = "[dbo].[小程序_报表_财务_月收费统计_全公司]";
+            SqlParameter spStartTime = SQLHelper.setParameterValue("@统计开始时间", Convert.ToDateTime(startTime), SqlDbType.Date);
+            SqlParameter spEndTime = SQLHelper.setParameterValue("@统计结束时间", Convert.ToDateTime(endTime), SqlDbType.Date);
+
+            DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString, spStartTime, spEndTime);
+            if (ds.Tables.Count == 0)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            DataTable dt = ds.Tables[0];
+            if (dt.Rows.Count == 0)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            List<object> list = new List<object>();
+            foreach (DataRow dr in dt.Rows)
+            {
+                var item = new
+                {
+                    chargeName = DataTypeHelper.GetStringValue(dr["费用名称"]),
+                    cashFooting = DataTypeHelper.GetNotNullDecimalValue(dr["现金实收合计"]),
+                    checkFooting = DataTypeHelper.GetNotNullDecimalValue(dr["支票实收合计"]),
+                    reduceDepositFooting = DataTypeHelper.GetNotNullDecimalValue(dr["预存扣减实收合计"]),
+                    otherFooting = DataTypeHelper.GetNotNullDecimalValue(dr["其他实收合计"]),
+                    overdueFineFooting = DataTypeHelper.GetNotNullDecimalValue(dr["滞纳金实收合计"]),
+                    allFooting = DataTypeHelper.GetNotNullDecimalValue(dr["实收总计"]),
+                    type = DataTypeHelper.GetStringValue(dr["费用种类"]),
+                };
+                list.Add(item);
+            }
+
+            DataTable dtProject = ds.Tables[1];
+            if (dtProject.Rows.Count == 0)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            List<object> listProject = new List<object>();
+            foreach (DataRow dr in dtProject.Rows)
+            {
+                var item = new
+                {
+                    ztCode = DataTypeHelper.GetStringValue(dr["帐套代码"]),
+                    ztName = DataTypeHelper.GetStringValue(dr["帐套名称"]),
+                    total = DataTypeHelper.GetDecimalValue(dr["实收总计"])
+                };
+                listProject.Add(item);
+            }
+
+            StatusReport sr = new StatusReport();
+            sr.status = "Success";
+            sr.result = "Success";
+            sr.data = new { company = list.ToArray(), projects = listProject.ToArray() };
+            return sr;
+        }
+
+
+
 
         public static StatusReport GetArrearageStatisticsProject(string ztcode, string month, string type)
         {
@@ -625,6 +689,49 @@ namespace HexiServer.Business
             sr.result = "Success";
             sr.data = new { count = itemCount, detail = listDetail.ToArray(), projects = listProject.ToArray() };
             return sr;
+        }
+
+
+        /// <summary>
+        /// 收入支出情况表
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="year"></param>
+        /// <returns></returns>
+        public static StatusReport GetIncomeAndExpenseStatistics(string year)
+        {
+            int searchYear = Convert.ToInt32(year);
+            string sqlString = "[dbo].[小程序_报表_收入支出情况表_公司]";
+            DataSet ds = SQLHelper.ExecuteProcedure("wyt", sqlString,
+                SQLHelper.setParameterValue("@查询年度", searchYear, SqlDbType.Int));
+            if (ds.Tables.Count < 1)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            List<object> list = new List<object>();
+            DataTable dt = ds.Tables[0];
+            if (dt.Rows.Count == 0)
+            {
+                return new StatusReport().SetFail("该时段没有数据，请更改时间段后再试");
+            }
+            foreach (DataRow dr in dt.Rows)
+            {
+                var item = new
+                {
+                    department = DataTypeHelper.GetStringValue(dr["部门"]),
+                    countAll = DataTypeHelper.GetNotNullDecimalValue(dr["支出合计"]),
+                    countInBudget = DataTypeHelper.GetNotNullDecimalValue(dr["预算内合计"]),
+                    countOutOfBudget = DataTypeHelper.GetNotNullDecimalValue(dr["预算外合计"]),
+                    countPaidService = DataTypeHelper.GetNotNullDecimalValue(dr["有偿服务支出"]),
+                    countOther = DataTypeHelper.GetNotNullDecimalValue(dr["其他支出总合计"]),
+                    balance = DataTypeHelper.GetNotNullDecimalValue(dr["余额"]),
+                    countCollectAndRemitTax = DataTypeHelper.GetNotNullDecimalValue(dr["代收代缴"]),
+                    countIncomeAll = DataTypeHelper.GetNotNullDecimalValue(dr["实收总计"]),
+                    countBudget = DataTypeHelper.GetNotNullDecimalValue(dr["预算总金额"])
+                };
+                list.Add(item);
+            }
+            return new StatusReport().SetSuccess(list.ToArray());
         }
 
 

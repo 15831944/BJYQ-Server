@@ -22,27 +22,87 @@ namespace HexiUserServer.Business
         public static StatusReport CheckOpenIdExist(string openId)
         {
             StatusReport sr = new StatusReport();
-            string sqlStr =
-                " SELECT ID, 房产单元ID, 房产单元编号, 姓名, 联系人手机, 帐套名称, 帐套代码 " +
-                " FROM dbo.小程序_业主信息 " +
-                " where openid = @openid";
-            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlStr, new SqlParameter("@openid", openId));
-            if (dt.Rows.Count == 0)
-            {
-                sr.status = "Fail";
-                sr.result = "无此用户";
-                return sr;
-            }
-            //var dataTable = from dtt in dt select dtt;
-            DataRow dr = dt.Rows[0];
             Proprietor proprietor = new Proprietor();
-            proprietor.Id = DataTypeHelper.GetIntValue(dr["ID"]);
-            //proprietor.RoomId = DataTypeHelper.GetIntValue(dr["房产单元ID"]);
-            //proprietor.RoomNumber = DataTypeHelper.GetStringValue(dr["房产单元编号"]);
-            proprietor.Name = DataTypeHelper.GetStringValue(dr["姓名"]);
-            proprietor.Phone = DataTypeHelper.GetStringValue(dr["联系人手机"]);
-            //proprietor.ZTName = DataTypeHelper.GetStringValue(dr["帐套名称"]);
-            //proprietor.ZTCode = DataTypeHelper.GetStringValue(dr["帐套代码"]);
+            DataTable dt = null;
+            //List<object>  
+            //TODO:目前无法解决openid绑定后，系统中又添加了同名占用者或同一占用者又占用了其他房产的问题
+            string sqlString = "select top 1 姓名,联系人手机 from dbo.小程序_业主信息 where openid = @openid";
+            DataTable dtProprietor = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@openid", openId));
+            if (dtProprietor.Rows.Count > 0)
+            {
+                DataRow drProprietor = dtProprietor.Rows[0];
+                sqlString = " SELECT ID, 房产单元ID, 房产单元编号, 姓名, 联系人手机, 帐套名称, 帐套代码, 是否占用者本人 " +
+                            " FROM dbo.小程序_业主信息 " +
+                            " where 姓名 = @name and 联系人手机 = @phone ";
+                dt = SQLHelper.ExecuteQuery("wyt", sqlString, 
+                                new SqlParameter("@name", DataTypeHelper.GetStringValue(drProprietor["姓名"])),
+                                new SqlParameter("@phone", DataTypeHelper.GetStringValue(drProprietor["联系人手机"])));
+                foreach(DataRow dr in dt.Rows)
+                {
+
+                }
+            }
+            else
+            {
+                sqlString = "select top 1 姓名,联系人手机 from dbo.小程序_业主亲属信息 where openid = @openid";
+                DataTable dtFamily = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@openid", openId));
+                if (dtFamily.Rows.Count > 0)
+                {
+                    DataRow drFamily = dtFamily.Rows[0];
+                    sqlString = " SELECT ID, 房产单元ID, 房产单元编号, 姓名, 联系人手机, 帐套名称, 帐套代码, 是否占用者本人 " +
+                                " FROM dbo.小程序_业主亲属信息 " +
+                                 " where 姓名 = @name and 联系人手机 = @phone ";
+                    dt = SQLHelper.ExecuteQuery("wyt", sqlString,
+                               new SqlParameter("@name", DataTypeHelper.GetStringValue(drFamily["姓名"])),
+                               new SqlParameter("@phone", DataTypeHelper.GetStringValue(drFamily["联系人手机"])));
+                    foreach (DataRow dr in dt.Rows)
+                    {
+
+                    }
+                }
+                else
+                {
+
+                }
+            }
+
+
+
+            //string sqlStr =
+            //    " if exists (select ID from dbo.小程序_业主信息 where openid = @openid) " +
+            //    " SELECT ID, 房产单元ID, 房产单元编号, 姓名, 联系人手机, 帐套名称, 帐套代码, 是否占用者本人 " +
+            //    " FROM dbo.小程序_业主信息 " +
+            //    " where openid = @openid " +
+            //    " else " +
+            //    " SELECT ID, 房产单元ID, 房产单元编号, 姓名, 联系人手机, 帐套名称, 帐套代码, 是否占用者本人 " +
+            //    " FROM dbo.小程序_业主亲属信息 " +
+            //    " where openid = @openid ";
+            //DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlStr, new SqlParameter("@openid", openId));
+            //if (dt.Rows.Count == 0)
+            //{
+            //    sr.status = "Fail";
+            //    sr.result = "无此用户";
+            //    return sr;
+            //}
+            //var dataTable = from dtt in dt select dtt;
+
+            //Proprietor proprietor = new Proprietor();
+            foreach (DataRow dr in dt.Rows)
+            {
+                if (string.IsNullOrEmpty(DataTypeHelper.GetStringValue(dr["姓名"])))
+                {
+                    continue;
+                }
+                else
+                {
+                    proprietor.Id = DataTypeHelper.GetIntValue(dr["ID"]);
+                    proprietor.Name = DataTypeHelper.GetStringValue(dr["姓名"]);
+                    proprietor.Phone = DataTypeHelper.GetStringValue(dr["联系人手机"]);
+                    proprietor.IsProprietor = DataTypeHelper.GetStringValue(dr["是否占用者本人"]);
+                    break;
+                }
+            }
+           
             List<RoomInfo> pList = new List<RoomInfo>();
             foreach (DataRow datarow in dt.Rows)
             {
@@ -86,7 +146,11 @@ namespace HexiUserServer.Business
         /// <returns></returns>
         public static StatusReport BindProprietor(string name, string phoneNumber, string openId)
         {
-            string sqlString = "update 资源占用者 set openid = @openid where 占用者名称 = @姓名 and 联系人手机 = @联系人手机";
+            string sqlString =
+                " if exists (select ID from 资源占用者 where 占用者名称 = @姓名 and 联系人手机 = @联系人手机) " +
+                " update 资源占用者 set openid = @openid where 占用者名称 = @姓名 and 联系人手机 = @联系人手机 " +
+                " else " +
+                " update 占用资料_占用人员详情 set openid = @openid where 姓名 = @姓名 and 联系电话 = @联系人手机 ";
 
             StatusReport sr = SQLHelper.Update("wyt", sqlString,
                 new SqlParameter("@OpenID", openId),
@@ -96,18 +160,17 @@ namespace HexiUserServer.Business
             return sr;
         }
 
-        public static StatusReport GetFamilyMembers(int id)
+        public static StatusReport GetFamilyMembers(string name, string phone)
         {
             StatusReport sr = new StatusReport();
-            string sqlString = " select ID,PID,姓名,性别,出生日期,身份证件名称,身份证件号码, " +
-                " 国籍或地区,与登记占用者关系,工作单位,联系电话 " +
+            string sqlString = " select ID,PID,姓名,与登记占用者关系,联系电话 " +
                 " from 占用资料_占用人员详情 " +
-                " where PID = (select ID from 占用资料 where 占用者ID = @占用者ID) "; 
-            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@占用者ID", id));
+                " where PID in (select ID from 占用资料 where 占用者ID in (select ID from 小程序_业主信息 where 姓名 = @姓名 and 联系人手机 = @联系人手机) ) "; 
+            DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@姓名", name), new SqlParameter("@联系人手机", phone));
             if (dt.Rows.Count == 0)
             {
                 sr.status = "Fail";
-                sr.result = "未查询到符合条件的记录";
+                sr.result = "获取亲属信息失败或还未添加亲属信息";
                 return sr;
             }
             List<FamilyMember> fmList = new List<FamilyMember>();
@@ -118,13 +181,13 @@ namespace HexiUserServer.Business
                     id = DataTypeHelper.GetIntValue(dr["ID"]),
                     pid = DataTypeHelper.GetIntValue(dr["PID"]),
                     name = DataTypeHelper.GetStringValue(dr["姓名"]),
-                    gender = DataTypeHelper.GetStringValue(dr["性别"]),
-                    birth = DataTypeHelper.GetDateStringValue(dr["出生日期"]),
-                    idType = DataTypeHelper.GetStringValue(dr["身份证件名称"]),
-                    idNumber = DataTypeHelper.GetStringValue(dr["身份证件号码"]),
-                    nation = DataTypeHelper.GetStringValue(dr["国籍或地区"]),
+                    //gender = DataTypeHelper.GetStringValue(dr["性别"]),
+                    //birth = DataTypeHelper.GetDateStringValue(dr["出生日期"]),
+                    //idType = DataTypeHelper.GetStringValue(dr["身份证件名称"]),
+                    //idNumber = DataTypeHelper.GetStringValue(dr["身份证件号码"]),
+                    //nation = DataTypeHelper.GetStringValue(dr["国籍或地区"]),
                     relation = DataTypeHelper.GetStringValue(dr["与登记占用者关系"]),
-                    company = DataTypeHelper.GetStringValue(dr["工作单位"]),
+                    //company = DataTypeHelper.GetStringValue(dr["工作单位"]),
                     phone = DataTypeHelper.GetStringValue(dr["联系电话"])
                 };
                 fmList.Add(fm);
@@ -135,61 +198,127 @@ namespace HexiUserServer.Business
             return sr;
         }
 
-        public static StatusReport AddFamily(int id, string gender, string address, string birth, string company, string idNumber, string idType, string job, string nation, string nationality, string phoneNumber, string relation, string userName, string[] roomId)
+        public static StatusReport AddFamily(int id, string phoneNumber, string relation, string userName, string roomId)
         {
             StatusReport sr = new StatusReport();
-
-            for(int i = 0; i < roomId.Length; i++)
-            {
-                string sqlStr = "if not exists (select ID from 占用资料 where 占用者ID=@占用者ID and 资源表ID = @资源表ID) " +
+            string sqlStr = "if not exists (select ID from 占用资料 where 占用者ID=@占用者ID and 资源表ID = @资源表ID) " +
                 " insert into 占用资料 (资源表名称,资源表ID,占用者ID,占用性质) " +
                 " select @资源表名称, @资源表ID ,@占用者ID, @占用性质 " +
                 " select @@IDENTITY ";
-                sr = SQLHelper.Insert("wyt", sqlStr,
-                    new SqlParameter("@资源表名称", "资源资料_房产单元"),
-                    new SqlParameter("@资源表ID", roomId[i]),
-                    new SqlParameter("@占用者ID", id),
-                    new SqlParameter("@占用性质", "正常"));
-                if (sr.result == "数据已存在" || sr.status == "Success")
-                {
-                    string sqlString = "insert into 占用资料_占用人员详情 (PID,姓名,性别,出生日期,身份证件名称,身份证件号码,国籍或地区,与登记占用者关系,工作单位,联系电话,民族,职务,住址) " +
-                " select ID, @姓名,@性别,@出生日期,@身份证件名称,@身份证件号码,@国籍或地区,@与登记占用者关系,@工作单位,@联系电话,@民族,@职务,@住址 from 占用资料 where 占用者ID = @占用者ID " +
-                " select @@IDENTITY ";
-                    sr = SQLHelper.Insert("wyt", sqlString,
-                        new SqlParameter("@姓名", userName),
-                        new SqlParameter("@性别", gender),
-                        new SqlParameter("@出生日期", birth),
-                        new SqlParameter("@身份证件名称", idType),
-                        new SqlParameter("@身份证件号码", idNumber),
-                        new SqlParameter("@国籍或地区", nationality),
-                        new SqlParameter("@与登记占用者关系", relation),
-                        new SqlParameter("@工作单位", company),
-                        new SqlParameter("@联系电话", phoneNumber),
-                        new SqlParameter("@民族", nation),
-                        new SqlParameter("@职务", job),
-                        new SqlParameter("@住址", address),
-                        new SqlParameter("@占用者ID", id));
-                    if (sr.status == "Success")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    break;
-                }
+            sr = SQLHelper.Insert("wyt", sqlStr,
+                new SqlParameter("@资源表名称", "资源资料_房产单元"),
+                new SqlParameter("@资源表ID", roomId),
+                new SqlParameter("@占用者ID", id),
+                new SqlParameter("@占用性质", "正常"));
+            if (sr.result == "数据已存在" || sr.status == "Success")
+            {
+                string sqlString = "insert into 占用资料_占用人员详情 (PID,姓名,与登记占用者关系,联系电话) " +
+            " select ID, @姓名,@与登记占用者关系,@联系电话 from 占用资料 where 占用者ID = @占用者ID " +
+            " select @@IDENTITY ";
+                sr = SQLHelper.Insert("wyt", sqlString,
+                    new SqlParameter("@姓名", DataTypeHelper.GetDBValue(userName)),
+                    new SqlParameter("@与登记占用者关系", DataTypeHelper.GetDBValue(relation)),
+                    new SqlParameter("@联系电话", DataTypeHelper.GetDBValue(phoneNumber)),
+                    new SqlParameter("@占用者ID", id));
+                
             }
             return sr;
+            //string[] roomIds = roomId.Split(',');
+            //for (int i = 0; i < roomIds.Length; i++)
+            //{
+            //    string sqlStr = "if not exists (select ID from 占用资料 where 占用者ID=@占用者ID and 资源表ID = @资源表ID) " +
+            //    " insert into 占用资料 (资源表名称,资源表ID,占用者ID,占用性质) " +
+            //    " select @资源表名称, @资源表ID ,@占用者ID, @占用性质 " +
+            //    " select @@IDENTITY ";
+            //    sr = SQLHelper.Insert("wyt", sqlStr,
+            //        new SqlParameter("@资源表名称", "资源资料_房产单元"),
+            //        new SqlParameter("@资源表ID", roomIds[i]),
+            //        new SqlParameter("@占用者ID", id),
+            //        new SqlParameter("@占用性质", "正常"));
+            //    if (sr.result == "数据已存在" || sr.status == "Success")
+            //    {
+            //        string sqlString = "insert into 占用资料_占用人员详情 (PID,姓名,与登记占用者关系,联系电话) " +
+            //    " select ID, @姓名,@与登记占用者关系,@联系电话 from 占用资料 where 占用者ID = @占用者ID " +
+            //    " select @@IDENTITY ";
+            //        sr = SQLHelper.Insert("wyt", sqlString,
+            //            new SqlParameter("@姓名", DataTypeHelper.GetDBValue(userName)),
+            //            new SqlParameter("@与登记占用者关系", DataTypeHelper.GetDBValue(relation)),
+            //            new SqlParameter("@联系电话", DataTypeHelper.GetDBValue(phoneNumber)),
+            //            new SqlParameter("@占用者ID", id));
+            //        if (sr.status == "Success")
+            //        {
+            //            continue;
+            //        }
+            //        else
+            //        {
+            //            break;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        break;
+            //    }
+            //}
+            //return sr;
 
         }
+
+        //public static StatusReport AddFamily(int id, string gender, string address, string birth, string company, string idNumber, string idType, string job, string nation, string nationality, string phoneNumber, string relation, string userName, string[] roomId)
+        //{
+        //    StatusReport sr = new StatusReport();
+
+        //    for(int i = 0; i < roomId.Length; i++)
+        //    {
+        //        string sqlStr = "if not exists (select ID from 占用资料 where 占用者ID=@占用者ID and 资源表ID = @资源表ID) " +
+        //        " insert into 占用资料 (资源表名称,资源表ID,占用者ID,占用性质) " +
+        //        " select @资源表名称, @资源表ID ,@占用者ID, @占用性质 " +
+        //        " select @@IDENTITY ";
+        //        sr = SQLHelper.Insert("wyt", sqlStr,
+        //            new SqlParameter("@资源表名称", "资源资料_房产单元"),
+        //            new SqlParameter("@资源表ID", roomId[i]),
+        //            new SqlParameter("@占用者ID", id),
+        //            new SqlParameter("@占用性质", "正常"));
+        //        if (sr.result == "数据已存在" || sr.status == "Success")
+        //        {
+        //            string sqlString = "insert into 占用资料_占用人员详情 (PID,姓名,性别,出生日期,身份证件名称,身份证件号码,国籍或地区,与登记占用者关系,工作单位,联系电话,民族,职务,住址) " +
+        //        " select ID, @姓名,@性别,@出生日期,@身份证件名称,@身份证件号码,@国籍或地区,@与登记占用者关系,@工作单位,@联系电话,@民族,@职务,@住址 from 占用资料 where 占用者ID = @占用者ID " +
+        //        " select @@IDENTITY ";
+        //            sr = SQLHelper.Insert("wyt", sqlString,
+        //                new SqlParameter("@姓名", DataTypeHelper.GetDBValue(userName)),
+        //                new SqlParameter("@性别", DataTypeHelper.GetDBValue(gender)),
+        //                new SqlParameter("@出生日期", DataTypeHelper.GetDBValue(birth)),
+        //                new SqlParameter("@身份证件名称", DataTypeHelper.GetDBValue(idType)),
+        //                new SqlParameter("@身份证件号码", DataTypeHelper.GetDBValue(idNumber)),
+        //                new SqlParameter("@国籍或地区", DataTypeHelper.GetDBValue(nationality)),
+        //                new SqlParameter("@与登记占用者关系", DataTypeHelper.GetDBValue(relation)),
+        //                new SqlParameter("@工作单位", DataTypeHelper.GetDBValue(company)),
+        //                new SqlParameter("@联系电话", DataTypeHelper.GetDBValue(phoneNumber)),
+        //                new SqlParameter("@民族", DataTypeHelper.GetDBValue(nation)),
+        //                new SqlParameter("@职务", DataTypeHelper.GetDBValue(job)),
+        //                new SqlParameter("@住址", DataTypeHelper.GetDBValue(address)),
+        //                new SqlParameter("@占用者ID", id));
+        //            if (sr.status == "Success")
+        //            {
+        //                continue;
+        //            }
+        //            else
+        //            {
+        //                break;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            break;
+        //        }
+        //    }
+        //    return sr;
+
+        //}
 
 
         /// <summary>
         /// 判断该占用者是否存在
+        /// 在资源占用者表中查找，如果不存在，再去占用资料_占用人员详情表中查找，查到ID返回True，否则返回False
         /// </summary>
         /// <param name="name"></param>
         /// <param name="phoneNumber"></param>
@@ -197,34 +326,26 @@ namespace HexiUserServer.Business
         private static bool CheckProprietorExist(string userName, string phoneNumber)
         {
             string sqlString =
-               "select " +
-               "ID " +
-               "from 资源占用者 " +
-               "where 占用者名称 = @占用者名称 and 联系人手机 like '%" + phoneNumber + "%' " +
-               "select @@IDENTITY";
+               " if exists (select ID from 资源占用者 where 占用者名称 = @占用者名称 and 联系人手机 like '%" + phoneNumber + "%' ) " +
+               " begin " +
+               " select " +
+               " ID " +
+               " from 资源占用者 " +
+               " where 占用者名称 = @占用者名称 and 联系人手机 like '%" + phoneNumber + "%' " +
+               " select @@IDENTITY " +
+               " end " +
+               " else " +
+               " begin " +
+               " select " +
+               " ID " +
+               " from 占用资料_占用人员详情 " +
+               " where 姓名 = @占用者名称 and 联系电话 like '%" + phoneNumber + "%' " +
+               " select @@IDENTITY " +
+               " end ";
             int id = SQLHelper.ExecuteScalar("wyt", sqlString,
                 new SqlParameter("@占用者名称", userName));
             return id > 0 ? true : false;
-            //if (id > 0)
-            //{
-            //    return true;
-            //}
-            //else
-            //{
-            //    sqlString = "select ID from 资源占用者 where ID = " +
-            //        " (select 占用者ID from 占用资料 where ID = " +
-            //        " (select PID from 占用资料_占用人员详情 where 姓名 = @姓名 and 联系人手机 like '%" + phoneNumber + "%')) " +
-            //        " select @@IDENTITY ";
-            //    id = SQLHelper.ExecuteScalar("wyt", sqlString, new SqlParameter("@姓名", userName));
-            //    if (id > 0)
-            //    {
-            //        return -(id);
-            //    }
-            //    else
-            //    {
-            //        return 0;
-            //    }
-            //}
+           
         }
 
 

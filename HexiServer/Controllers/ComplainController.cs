@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using HexiUtils;
 using HexiServer.Business;
+using HexiServer.Models;
 
 namespace HexiServer.Controllers
 {
@@ -56,7 +57,7 @@ namespace HexiServer.Controllers
             }
             try
             {
-                string mainPath = "F:\\wytws\\Files\\jczl_fwrwgl\\";
+                string mainPath = Comman.file_main_path + @"jczl_fwrwgl\";
                 string imagePath = mainPath + Request.Files.AllKeys[0];
                 string sqlImagePath = Request.Files.AllKeys[0];
                 HttpPostedFileBase uploadImage = (Request.Files[0]);

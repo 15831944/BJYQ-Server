@@ -39,7 +39,6 @@ C:\Users\Admin\Documents\GitHub\BJYQ-Server\Utils\bin\Release\Senparc.Weixin.xml
 C:\Users\Admin\Documents\GitHub\BJYQ-Server\Utils\bin\Release\Senparc.Weixin.MP.xml
 C:\Users\Admin\Documents\GitHub\BJYQ-Server\Utils\bin\Release\Senparc.Weixin.WxOpen.xml
 C:\Users\Admin\Documents\GitHub\BJYQ-Server\Utils\obj\Release\HexiUtils.csprojAssemblyReference.cache
-C:\Users\Admin\Documents\GitHub\BJYQ-Server\Utils\obj\Release\HexiUtils.csproj.CoreCompileInputs.cache
 C:\Users\Admin\Documents\GitHub\BJYQ-Server\Utils\obj\Release\HexiUtils.csproj.CopyComplete
 C:\Users\Admin\Documents\GitHub\BJYQ-Server\Utils\obj\Release\HexiUtils.dll
 C:\Users\Admin\Documents\GitHub\BJYQ-Server\Utils\obj\Release\HexiUtils.pdb

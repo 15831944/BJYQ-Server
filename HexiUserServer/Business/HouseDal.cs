@@ -13,7 +13,7 @@ namespace HexiUserServer.Business
     {
         public static StatusReport GetHouseDetail(string roomNumber)
         {
-            string sqlString = "select 房号,层数,建筑面积,所属楼宇,性质,房产类型,户型,部门,所属单元 " +
+            string sqlString = "select 房号,层数,建筑面积,所属楼宇,性质,房产类型,户型,坐落地址 " +
                 " from 资源资料_房产单元 " +
                 " where 编号 = @编号 ";
             DataTable dt = SQLHelper.ExecuteQuery("wyt", sqlString, new SqlParameter("@编号", roomNumber));
@@ -30,8 +30,8 @@ namespace HexiUserServer.Business
             house.property = DataTypeHelper.GetStringValue(dr["性质"]);
             house.type = DataTypeHelper.GetStringValue(dr["房产类型"]);
             house.houseType = DataTypeHelper.GetStringValue(dr["户型"]);
-            house.department = DataTypeHelper.GetStringValue(dr["部门"]);
-            house.unit = DataTypeHelper.GetStringValue(dr["所属单元"]);
+            //house.department = DataTypeHelper.GetStringValue(dr["部门"]);
+            house.unit = DataTypeHelper.GetStringValue(dr["坐落地址"]);
             return new StatusReport(house);
         }
 

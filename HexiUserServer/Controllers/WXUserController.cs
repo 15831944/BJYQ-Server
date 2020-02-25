@@ -138,18 +138,26 @@ namespace HexiServer.Controllers
         /// <param name="relation"></param>
         /// <param name="userName"></param>
         /// <returns></returns>
-        public ActionResult OnAddFamily(int id, string gender, string address, string birth, string company, string idNumber, string idType, string job, string nation, string nationality, string phoneNumber, string relation, string userName, string[] roomId)
+        //public ActionResult OnAddFamily(int id, string gender, string address, string birth, string company, string idNumber, string idType, string job, string nation, string nationality, string phoneNumber, string relation, string userName, string[] roomId)
+        //{
+        //    StatusReport sr = new StatusReport();
+        //    sr = ProprietorDal.AddFamily(id, gender, address, birth, company, idNumber, idType, job, nation, nationality, phoneNumber, relation, userName,roomId);
+        //    return Json(sr);
+
+        //}
+
+        public ActionResult OnAddFamily(int id, string phoneNumber, string relation, string userName, string roomId)
         {
             StatusReport sr = new StatusReport();
-            sr = ProprietorDal.AddFamily(id, gender, address, birth, company, idNumber, idType, job, nation, nationality, phoneNumber, relation, userName,roomId);
+            sr = ProprietorDal.AddFamily(id, phoneNumber, relation, userName, roomId);
             return Json(sr);
 
         }
 
         [HttpPost]
-        public ActionResult OnGetFamilyMembers(int id)
+        public ActionResult OnGetFamilyMembers(string name, string phone)
         {
-            return Json(ProprietorDal.GetFamilyMembers(id));
+            return Json(ProprietorDal.GetFamilyMembers(name, phone));
         }
     }
 }

@@ -71,7 +71,7 @@ namespace HexiServer.Controllers
             }
             try
             { 
-                string mainPath = "F:\\wytws\\Files\\bywj\\";
+                string mainPath = Comman.file_main_path + @"bywj\";
                 string imagePath = mainPath + Request.Files.AllKeys[0];
                 string sqlImagePath = Request.Files.AllKeys[0];
                 HttpPostedFileBase uploadImage = (Request.Files[0]);

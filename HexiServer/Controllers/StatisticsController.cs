@@ -10,6 +10,21 @@ namespace HexiServer.Controllers
 {
     public class StatisticsController : Controller
     {
+
+        public ActionResult OnGetIncomeAndExpenseStatistics(string level, string year)
+        {
+            StatusReport sr = new StatusReport();
+            if (string.IsNullOrEmpty(level) || string.IsNullOrEmpty(year))
+            {
+                return Json(sr.SetFail("请求数据不完整"));
+            }
+            if (level != "公司")
+            {
+                return Json(sr.SetFail("没有此权限"));
+            }
+            return Json(ChargeDal.GetIncomeAndExpenseStatistics(year));
+        }
+
         /// <summary>
         /// 财务_月收费统计
         /// </summary>
@@ -17,16 +32,21 @@ namespace HexiServer.Controllers
         /// <param name="level">用户身份</param>
         /// <param name="startTime">开始时间</param>
         /// <returns></returns>
-        public ActionResult OnGetMonthChargeStatistics(string ztcode, string level, string startTime )
+        public ActionResult OnGetMonthChargeStatistics(string ztcode, string level, string startTime, string endTime )
         {
             StatusReport sr = new StatusReport();
-            if (string.IsNullOrEmpty(level) || string.IsNullOrEmpty(ztcode) || string.IsNullOrEmpty(startTime))
+            if (string.IsNullOrEmpty(level) || string.IsNullOrEmpty(startTime))
             {
                 sr.status = "Fail";
                 sr.result = "信息不完整";
                 return Json(sr);
             }
-            sr = ChargeDal.GetMonthChargeStatistics(ztcode, level, startTime);
+            if (string.IsNullOrEmpty(endTime))
+            {
+                endTime = DateTime.Now.ToString();
+            }
+            
+            sr = level == "公司" ? ChargeDal.GetMonthChargeStatisticsCompany(startTime, endTime) : ChargeDal.GetMonthChargeStatisticsProject(ztcode, startTime, endTime);
             return Json(sr);
         }
 
